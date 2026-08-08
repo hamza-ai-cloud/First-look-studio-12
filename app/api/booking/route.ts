@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import { sendEmail, sendAdminNotification } from '@/lib/email';
 import { isValidEmail, isValidPhone, normalizeText } from '@/lib/validators';
 
 export const runtime = 'nodejs';
@@ -65,6 +66,23 @@ export async function POST(request: Request) {
       status: 'pending',
       createdAt: new Date(),
     });
+
+    // Send notifications (safe no-op if email not configured)
+    try {
+      await sendAdminNotification({
+        subject: `New booking: ${service} - ${name}`,
+        text: `New booking received from ${name} (${email}). Service: ${service} on ${date} ${time}. Phone: ${phone}`,
+      });
+
+      // Customer confirmation (optional)
+      await sendEmail({
+        to: email,
+        subject: 'Booking received — First Look Studio',
+        text: `Thanks ${name}, we received your booking for ${service} on ${date} at ${time}. We'll contact you to confirm.`,
+      });
+    } catch (err) {
+      console.error('Notification error:', err);
+    }
 
     return NextResponse.json(
       {

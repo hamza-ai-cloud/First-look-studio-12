@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import { sendEmail, sendAdminNotification } from '@/lib/email';
 import { isValidEmail, normalizeText } from '@/lib/validators';
 
 export const runtime = 'nodejs';
@@ -51,6 +52,21 @@ export async function POST(request: Request) {
       status: 'new',
       createdAt: new Date(),
     });
+
+    try {
+      await sendAdminNotification({
+        subject: `New contact: ${subject} — ${name}`,
+        text: `New contact message from ${name} (${email}): ${message}`,
+      });
+
+      await sendEmail({
+        to: email,
+        subject: 'Thanks for contacting First Look Studio',
+        text: `Hi ${name},\n\nThanks for your message. We'll get back to you within 24 hours.\n\n— First Look Studio`,
+      });
+    } catch (err) {
+      console.error('Contact notification error:', err);
+    }
 
     return NextResponse.json(
       {
