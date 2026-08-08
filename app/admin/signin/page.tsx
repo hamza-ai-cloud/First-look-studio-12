@@ -10,6 +10,7 @@ export default function AdminSignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  // Note: middleware handles redirecting authenticated admins away from /admin/signin.
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

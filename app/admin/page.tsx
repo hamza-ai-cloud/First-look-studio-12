@@ -1,6 +1,8 @@
 import { connectToDatabase } from '@/lib/mongodb';
 import { format } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   const { db } = await connectToDatabase();
 

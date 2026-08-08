@@ -1,6 +1,8 @@
 import { connectToDatabase } from '@/lib/mongodb';
 import BookingsList from '@/components/admin/bookings-list';
 
+export const dynamic = 'force-dynamic';
+
 export default async function BookingsPage() {
   const { db } = await connectToDatabase();
   const bookings = await db.collection('bookings').find().sort({ createdAt: -1 }).limit(100).toArray();

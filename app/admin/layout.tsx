@@ -1,18 +1,11 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-
 export const metadata = {
   title: 'Admin - First Look Studio',
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions as any);
-
-  if (!session || (session as any).user?.role !== 'admin') {
-    redirect('/admin/signin');
-  }
-
+  // Middleware will enforce authentication for protected admin routes.
+  // Keep layout simple and render children; do not redirect here to avoid
+  // wrapping the public sign-in page and causing redirect loops.
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
