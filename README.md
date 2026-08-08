@@ -1,1 +1,3 @@
-# First-look-studio-12
+# First-Look-Studio-12
+
+[![Open in Bolt](https://bolt.new/static/open-in-bolt.svg)](https://bolt.new/~/sb1-otik7upz)

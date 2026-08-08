@@ -1,0 +1,76 @@
+import { NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
+import { isValidEmail, normalizeText } from '@/lib/validators';
+
+export const runtime = 'nodejs';
+
+export async function POST(request: Request) {
+  try {
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+
+    const name = normalizeText(body.name);
+    const email = normalizeText(body.email).toLowerCase();
+    const subject = normalizeText(body.subject);
+    const message = normalizeText(body.message);
+
+    if (name.length < 2) {
+      return NextResponse.json(
+        { success: false, message: 'Please enter your full name.' },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { success: false, message: 'Please enter a valid email address.' },
+        { status: 400 },
+      );
+    }
+
+    if (subject.length < 3) {
+      return NextResponse.json(
+        { success: false, message: 'Please provide a subject.' },
+        { status: 400 },
+      );
+    }
+
+    if (message.length < 10) {
+      return NextResponse.json(
+        { success: false, message: 'Please include a more detailed message.' },
+        { status: 400 },
+      );
+    }
+
+    const { db } = await connectToDatabase();
+
+    const result = await db.collection('contacts').insertOne({
+      name,
+      email,
+      subject,
+      message,
+      status: 'new',
+      createdAt: new Date(),
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Message submitted successfully. We will get back to you within 24 hours.',
+        data: {
+          id: result.insertedId.toString(),
+        },
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error('Contact submission error:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Unable to submit your message right now. Please try again later.',
+      },
+      { status: 500 },
+    );
+  }
+}
