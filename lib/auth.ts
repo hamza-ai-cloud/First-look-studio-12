@@ -1,47 +1,81 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { connectToDatabase } from './mongodb';
+import { supabaseAdmin } from './supabaseAdmin';
 import bcrypt from 'bcryptjs';
-import { seedAdminFromEnv } from './seedAdmin';
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
+
   providers: [
     CredentialsProvider({
       name: 'Credentials',
+
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
+
       async authorize(credentials) {
-        if (!credentials) return null;
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
 
-        // Ensure initial admin exists if env seed provided
-        await seedAdminFromEnv();
+        const email = credentials.email.toLowerCase().trim();
 
-        const { db } = await connectToDatabase();
-        const user = await db.collection('admins').findOne({ email: credentials.email.toLowerCase() });
-        if (!user) return null;
+        const { data: user, error } = await supabaseAdmin
+          .from('admins')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
 
-        const ok = await bcrypt.compare(credentials.password, user.passwordHash as string);
-        if (!ok) return null;
+        if (error || !user) {
+          return null;
+        }
 
-        return { id: user._id.toString(), email: user.email, name: 'Admin', role: user.role || 'admin' } as any;
+        const passwordHash =
+          user.password_hash || user.passwordHash;
+
+        if (!passwordHash) {
+          return null;
+        }
+
+        const ok = await bcrypt.compare(
+          credentials.password,
+          passwordHash
+        );
+
+        if (!ok) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: 'Admin',
+          role: user.role || 'admin',
+        } as any;
       },
     }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role || 'admin';
       }
+
       return token;
     },
+
     async session({ session, token }) {
-      (session as any).user.role = token.role;
+      if (session.user) {
+        (session.user as any).role = token.role;
+      }
+
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { normalizeText, isValidEmail } from '@/lib/validators';
 
 export const runtime = 'nodejs';
@@ -13,21 +13,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Please enter a valid email address.' }, { status: 400 });
     }
 
-    const { db } = await connectToDatabase();
+    const { data: existing, error: existingError } = await supabaseAdmin
+  .from('newsletter_subscribers')
+  .select('id')
+  .eq('email', email)
+  .maybeSingle();
 
-    const existing = await db.collection('newsletter_subscribers').findOne({ email });
-    if (existing) {
+if (existingError) {
+  throw existingError;
+}
+
+if (existing) {
       return NextResponse.json({
         success: true,
         message: 'You are already subscribed to our newsletter.',
       });
     }
 
-    await db.collection('newsletter_subscribers').insertOne({
-      email,
-      createdAt: new Date(),
-      status: 'active',
-    });
+    const { error } = await supabaseAdmin
+  .from('newsletter_subscribers')
+  .insert({
+    email,
+    status: 'active',
+  });
+
+if (error) {
+  throw error;
+}
 
     return NextResponse.json({
       success: true,

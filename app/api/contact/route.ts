@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { sendEmail, sendAdminNotification } from '@/lib/email';
 import { isValidEmail, normalizeText } from '@/lib/validators';
 
@@ -42,16 +42,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const { db } = await connectToDatabase();
+    const { data, error } = await supabaseAdmin
+  .from('contacts')
+  .insert({
+    name,
+    email,
+    subject,
+    message,
+    status: 'new',
+  })
+  .select('id')
+  .single();
 
-    const result = await db.collection('contacts').insertOne({
-      name,
-      email,
-      subject,
-      message,
-      status: 'new',
-      createdAt: new Date(),
-    });
+if (error) {
+  throw error;
+}
 
     try {
       await sendAdminNotification({
@@ -73,7 +78,7 @@ export async function POST(request: Request) {
         success: true,
         message: 'Message submitted successfully. We will get back to you within 24 hours.',
         data: {
-          id: result.insertedId.toString(),
+          id: data.id,
         },
       },
       { status: 201 },

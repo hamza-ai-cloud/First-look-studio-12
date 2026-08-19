@@ -1,14 +1,21 @@
-import { connectToDatabase } from '@/lib/mongodb';
-import BookingsList from '@/components/admin/bookings-list';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import BookingsList from '@/components/admin/BookingsView';
 
 export const dynamic = 'force-dynamic';
 
 export default async function BookingsPage() {
-  const { db } = await connectToDatabase();
-  const bookings = await db.collection('bookings').find().sort({ createdAt: -1 }).limit(100).toArray();
+  const { data: bookings, error } = await supabaseAdmin
+    .from('bookings')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100);
 
-  const initial = bookings.map((b: any) => ({
-    id: b._id.toString(),
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const initial = (bookings || []).map((b: any) => ({
+    id: b.id,
     name: b.name,
     email: b.email,
     phone: b.phone,
@@ -17,16 +24,33 @@ export default async function BookingsPage() {
     time: b.time,
     notes: b.notes,
     status: b.status,
-    createdAt: b.createdAt,
+    createdAt: b.created_at,
   }));
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Bookings</h1>
-      <div>
-        {/* Client-side interactive list */}
-        <BookingsList initialData={initial} />
-      </div>
+      <BookingsList
+        bookings={initial.map((b: any) => ({
+          ...b,
+          _id: b.id,
+          client_name: b.name,
+          client_email: b.email,
+          service_package: b.service,
+          event_date: b.date,
+          total_price: 0,
+        }))}
+        onUpdateStatus={async (id, status) => {
+          await fetch('/api/admin/bookings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, status }),
+          });
+        }}
+        onUpdateNotes={async () => {}}
+        onDeleteBooking={async () => {}}
+      />
     </div>
   );
+
 }

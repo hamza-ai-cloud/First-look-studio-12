@@ -1,0 +1,323 @@
+===== FIRST LOOK STUDIO PROJECT AUDIT =====
+DATE: Wed Aug 19 10:09:13 UTC 2026
+
+===== PACKAGE.JSON =====
+{
+  "name": "nextjs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@netlify/plugin-nextjs": "^5.15.1",
+    "@next/swc-wasm-nodejs": "13.5.1",
+    "@radix-ui/react-accordion": "^1.2.0",
+    "@radix-ui/react-alert-dialog": "^1.1.1",
+    "@radix-ui/react-aspect-ratio": "^1.1.0",
+    "@radix-ui/react-avatar": "^1.1.0",
+    "@radix-ui/react-checkbox": "^1.1.1",
+    "@radix-ui/react-collapsible": "^1.1.0",
+    "@radix-ui/react-context-menu": "^2.2.1",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-hover-card": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-menubar": "^1.1.1",
+    "@radix-ui/react-navigation-menu": "^1.2.0",
+    "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-progress": "^1.1.0",
+    "@radix-ui/react-radio-group": "^1.2.0",
+    "@radix-ui/react-scroll-area": "^1.1.0",
+    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slider": "^1.2.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.1",
+    "@radix-ui/react-toggle": "^1.1.0",
+    "@radix-ui/react-toggle-group": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.2",
+    "@react-three/drei": "^9.114.0",
+    "@react-three/fiber": "^8.17.10",
+    "@sendgrid/mail": "^7.7.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
+    "@types/node": "20.6.2",
+    "@types/react": "18.2.22",
+    "@types/react-dom": "18.2.7",
+    "autoprefixer": "10.4.15",
+    "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.0.0",
+    "date-fns": "^3.6.0",
+    "embla-carousel-react": "^8.3.0",
+    "eslint": "8.49.0",
+    "eslint-config-next": "13.5.1",
+    "framer-motion": "^11.11.9",
+    "gsap": "^3.12.5",
+    "input-otp": "^1.2.4",
+    "lucide-react": "^0.446.0",
+    "maath": "^0.10.7",
+    "next": "13.5.1",
+    "next-auth": "^4.22.1",
+    "next-themes": "^0.3.0",
+    "postcss": "8.4.30",
+    "react": "18.2.0",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "18.2.0",
+    "react-hook-form": "^7.53.0",
+    "react-resizable-panels": "^2.1.3",
+    "recharts": "^2.12.7",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss": "3.3.3",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.169.0",
+    "typescript": "5.2.2",
+    "vaul": "^0.9.9",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/three": "^0.169.0"
+  }
+}
+
+===== PROJECT FILES =====
+./.bolt/config.json
+./.bolt/ignore
+./.bolt/prompt
+./.env.local.example
+./.eslintrc.json
+./.gitignore
+./README.md
+./app/about/page.tsx
+./app/admin/bookings/page.tsx
+./app/admin/layout.tsx
+./app/admin/page.tsx
+./app/admin/signin/page.tsx
+./app/api/admin-check/route.ts
+./app/api/admin/bookings/route.ts
+./app/api/admin/contacts/route.ts
+./app/api/auth/[...nextauth]/route.ts
+./app/api/booking/route.ts
+./app/api/career/route.ts
+./app/api/contact/route.ts
+./app/api/health/route.ts
+./app/api/newsletter/route.ts
+./app/api/supabase-test/route.ts
+./app/blog/[slug]/page.tsx
+./app/blog/page.tsx
+./app/booking/page.tsx
+./app/career/page.tsx
+./app/contact/page.tsx
+./app/faq/page.tsx
+./app/gallery/page.tsx
+./app/globals.css
+./app/layout.tsx
+./app/not-found.tsx
+./app/page.tsx
+./app/portfolio/page.tsx
+./app/pricing/page.tsx
+./app/privacy-policy/page.tsx
+./app/robots.ts
+./app/services/page.tsx
+./app/shop/page.tsx
+./app/sitemap.ts
+./app/terms/page.tsx
+./app/testimonials/page.tsx
+./components.json
+./components/admin/BookingsView.tsx
+./components/admin/DashboardView.tsx
+./components/admin/GalleryView.tsx
+./components/admin/MessagesView.tsx
+./components/admin/ServicesView.tsx
+./components/layout/back-to-top.tsx
+./components/layout/footer.tsx
+./components/layout/loading-screen.tsx
+./components/layout/navbar.tsx
+./components/layout/scroll-progress.tsx
+./components/providers/theme-provider.tsx
+./components/sections/about-preview.tsx
+./components/sections/blog-preview.tsx
+./components/sections/cta-section.tsx
+./components/sections/featured-gallery.tsx
+./components/sections/hero-section.tsx
+./components/sections/newsletter-section.tsx
+./components/sections/our-branches-section.tsx
+./components/sections/page-header.tsx
+./components/sections/services-slider.tsx
+./components/sections/testimonials-section.tsx
+./components/three/hero-scene.tsx
+./components/three/models.tsx
+./components/ui/accordion.tsx
+./components/ui/alert-dialog.tsx
+./components/ui/alert.tsx
+./components/ui/aspect-ratio.tsx
+./components/ui/avatar.tsx
+./components/ui/badge.tsx
+./components/ui/breadcrumb.tsx
+./components/ui/button.tsx
+./components/ui/calendar.tsx
+./components/ui/card.tsx
+./components/ui/carousel.tsx
+./components/ui/chart.tsx
+./components/ui/checkbox.tsx
+./components/ui/collapsible.tsx
+./components/ui/command.tsx
+./components/ui/context-menu.tsx
+./components/ui/dialog.tsx
+./components/ui/drawer.tsx
+./components/ui/dropdown-menu.tsx
+./components/ui/form.tsx
+./components/ui/hover-card.tsx
+./components/ui/input-otp.tsx
+./components/ui/input.tsx
+./components/ui/label.tsx
+./components/ui/menubar.tsx
+./components/ui/navigation-menu.tsx
+./components/ui/pagination.tsx
+./components/ui/popover.tsx
+./components/ui/progress.tsx
+./components/ui/radio-group.tsx
+./components/ui/resizable.tsx
+./components/ui/scroll-area.tsx
+./components/ui/select.tsx
+./components/ui/separator.tsx
+./components/ui/sheet.tsx
+./components/ui/skeleton.tsx
+./components/ui/slider.tsx
+./components/ui/sonner.tsx
+./components/ui/switch.tsx
+./components/ui/table.tsx
+./components/ui/tabs.tsx
+./components/ui/textarea.tsx
+./components/ui/toast.tsx
+./components/ui/toaster.tsx
+./components/ui/toggle-group.tsx
+./components/ui/toggle.tsx
+./components/ui/tooltip.tsx
+./hooks/use-toast.ts
+./lib/auth.ts
+./lib/data.ts
+./lib/email.ts
+./lib/pexels-data.ts
+./lib/supabaseAdmin.ts
+./lib/types.ts
+./lib/utils.ts
+./lib/validators.ts
+./middleware.ts
+./netlify.toml
+./next-env.d.ts
+./next.config.js
+./package-lock.json
+./package.json
+./postcss.config.js
+./project-audit.txt
+./project-structure.txt
+./public/icon.svg
+./public/manifest.json
+./scripts/e2e-live-forms.mjs
+./scripts/live-forms.spec.js
+./tailwind.config.ts
+./test-results/.last-run.json
+./tsconfig.json
+./tsconfig.tsbuildinfo
+./utils/supabase/client.ts
+./utils/supabase/server.ts
+
+===== ENVIRONMENT FILES (NAMES ONLY) =====
+./.env.local.example
+./.env.local
+
+===== NEXT.JS INFO =====
+npm error code E404
+npm error 404 Not Found - GET https://registry.npmjs.org/next-info - Not found
+npm error 404
+npm error 404  The requested resource 'next-info@*' could not be found or you do not have permission to access it.
+npm error 404
+npm error 404 Note that you can also install from a
+npm error 404 tarball, folder, http url, or git url.
+npm error A complete log of this run can be found in: /home/codespace/.npm/_logs/2026-08-19T10_09_16_995Z-debug-0.log
+
+===== TYPESCRIPT CHECK =====
+
+===== BUILD CHECK =====
+
+> nextjs@0.1.0 build
+> next build
+
+   Creating an optimized production build...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx browserslist@latest --update-db
+  Why you should do it regularly: https://github.com/browserslist/browserslist#browsers-data-updating
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types...
+   Collecting page data...
+   Generating static pages (0/32)...
+   Generating static pages (8/32)
+
+   Generating static pages (16/32)
+
+   Generating static pages (24/32)
+
+ ✓ Generating static pages (32/32)
+   Finalizing page optimization...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    11.8 kB         314 kB
+├ ○ /_not-found                          0 B                0 B
+├ ○ /about                               4.63 kB         120 kB
+├ λ /admin                               5.98 kB        92.1 kB
+├ λ /admin/bookings                      4.55 kB          84 kB
+├ ○ /admin/signin                        16.2 kB         102 kB
+├ ○ /api/admin-check                     0 B                0 B
+├ λ /api/admin/bookings                  0 B                0 B
+├ λ /api/admin/contacts                  0 B                0 B
+├ λ /api/auth/[...nextauth]              0 B                0 B
+├ λ /api/booking                         0 B                0 B
+├ λ /api/career                          0 B                0 B
+├ λ /api/contact                         0 B                0 B
+├ ○ /api/health                          0 B                0 B
+├ λ /api/newsletter                      0 B                0 B
+├ ○ /api/supabase-test                   0 B                0 B
+├ ○ /blog                                8.52 kB         130 kB
+├ λ /blog/[slug]                         9.06 kB         147 kB
+├ ○ /booking                             10.1 kB         142 kB
+├ ○ /career                              3.74 kB         135 kB
+├ ○ /contact                             3.81 kB         135 kB
+├ ○ /faq                                 6.72 kB         137 kB
+├ ○ /gallery                             4.77 kB         120 kB
+├ ○ /portfolio                           10.2 kB         125 kB
+├ ○ /pricing                             7.28 kB         137 kB
+├ ○ /privacy-policy                      2.51 kB         118 kB
+├ ○ /robots.txt                          0 B                0 B
+├ ○ /services                            6.9 kB          293 kB
+├ ○ /shop                                11.5 kB         143 kB
+├ ○ /sitemap.xml                         0 B                0 B
+├ ○ /terms                               3.06 kB         118 kB
+└ ○ /testimonials                        6.88 kB         122 kB
++ First Load JS shared by all            79.5 kB
+  ├ chunks/864-4379d9aa484d71b3.js       26.5 kB
+  ├ chunks/fd9d1056-11082767387387be.js  50.9 kB
+  ├ chunks/main-app-a63c7a69930b0b20.js  226 B
+  └ chunks/webpack-e820baed31759278.js   1.83 kB
+
+
+ƒ Middleware                             58 kB
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+

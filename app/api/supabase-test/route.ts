@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-export const runtime = 'nodejs';
-
 export async function GET() {
   try {
-    const { count, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('bookings')
-      .select('id', { count: 'exact', head: true });
+      .select('id')
+      .limit(1);
 
     if (error) {
       throw error;
@@ -16,10 +15,10 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       supabase: 'connected',
-      bookings: count || 0,
+      data,
     });
   } catch (error) {
-    console.error('Health check failure:', error);
+    console.error('Supabase test error:', error);
 
     return NextResponse.json(
       {

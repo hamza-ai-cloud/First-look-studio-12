@@ -1,0 +1,179 @@
+.
+├── .bolt
+│   ├── config.json
+│   ├── ignore
+│   └── prompt
+├── .env.local.example
+├── .eslintrc.json
+├── .gitignore
+├── README.md
+├── app
+│   ├── about
+│   │   └── page.tsx
+│   ├── admin
+│   │   ├── bookings
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── signin
+│   │       └── page.tsx
+│   ├── api
+│   │   ├── admin
+│   │   │   ├── bookings
+│   │   │   │   └── route.ts
+│   │   │   └── contacts
+│   │   │       └── route.ts
+│   │   ├── auth
+│   │   │   └── [...nextauth]
+│   │   │       └── route.ts
+│   │   ├── booking
+│   │   │   └── route.ts
+│   │   ├── career
+│   │   │   └── route.ts
+│   │   ├── contact
+│   │   │   └── route.ts
+│   │   ├── health
+│   │   │   └── route.ts
+│   │   └── newsletter
+│   │       └── route.ts
+│   ├── blog
+│   │   ├── [slug]
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   ├── booking
+│   │   └── page.tsx
+│   ├── career
+│   │   └── page.tsx
+│   ├── contact
+│   │   └── page.tsx
+│   ├── faq
+│   │   └── page.tsx
+│   ├── gallery
+│   │   └── page.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   ├── page.tsx
+│   ├── portfolio
+│   │   └── page.tsx
+│   ├── pricing
+│   │   └── page.tsx
+│   ├── privacy-policy
+│   │   └── page.tsx
+│   ├── robots.ts
+│   ├── services
+│   │   └── page.tsx
+│   ├── shop
+│   │   └── page.tsx
+│   ├── sitemap.ts
+│   ├── terms
+│   │   └── page.tsx
+│   └── testimonials
+│       └── page.tsx
+├── backend
+├── components
+│   ├── admin
+│   │   └── BookingView.tsx
+│   ├── layout
+│   │   ├── back-to-top.tsx
+│   │   ├── footer.tsx
+│   │   ├── loading-screen.tsx
+│   │   ├── navbar.tsx
+│   │   └── scroll-progress.tsx
+│   ├── providers
+│   │   └── theme-provider.tsx
+│   ├── sections
+│   │   ├── about-preview.tsx
+│   │   ├── blog-preview.tsx
+│   │   ├── cta-section.tsx
+│   │   ├── featured-gallery.tsx
+│   │   ├── hero-section.tsx
+│   │   ├── newsletter-section.tsx
+│   │   ├── our-branches-section.tsx
+│   │   ├── page-header.tsx
+│   │   ├── services-slider.tsx
+│   │   └── testimonials-section.tsx
+│   ├── three
+│   │   ├── hero-scene.tsx
+│   │   └── models.tsx
+│   └── ui
+│       ├── accordion.tsx
+│       ├── alert-dialog.tsx
+│       ├── alert.tsx
+│       ├── aspect-ratio.tsx
+│       ├── avatar.tsx
+│       ├── badge.tsx
+│       ├── breadcrumb.tsx
+│       ├── button.tsx
+│       ├── calendar.tsx
+│       ├── card.tsx
+│       ├── carousel.tsx
+│       ├── chart.tsx
+│       ├── checkbox.tsx
+│       ├── collapsible.tsx
+│       ├── command.tsx
+│       ├── context-menu.tsx
+│       ├── dialog.tsx
+│       ├── drawer.tsx
+│       ├── dropdown-menu.tsx
+│       ├── form.tsx
+│       ├── hover-card.tsx
+│       ├── input-otp.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       ├── menubar.tsx
+│       ├── navigation-menu.tsx
+│       ├── pagination.tsx
+│       ├── popover.tsx
+│       ├── progress.tsx
+│       ├── radio-group.tsx
+│       ├── resizable.tsx
+│       ├── scroll-area.tsx
+│       ├── select.tsx
+│       ├── separator.tsx
+│       ├── sheet.tsx
+│       ├── skeleton.tsx
+│       ├── slider.tsx
+│       ├── sonner.tsx
+│       ├── switch.tsx
+│       ├── table.tsx
+│       ├── tabs.tsx
+│       ├── textarea.tsx
+│       ├── toast.tsx
+│       ├── toaster.tsx
+│       ├── toggle-group.tsx
+│       ├── toggle.tsx
+│       └── tooltip.tsx
+├── components.json
+├── hooks
+│   └── use-toast.ts
+├── lib
+│   ├── auth.ts
+│   ├── data.ts
+│   ├── email.ts
+│   ├── mongodb.ts
+│   ├── pexels-data.ts
+│   ├── seedAdmin.ts
+│   ├── utils.ts
+│   └── validators.ts
+├── middleware.ts
+├── netlify.toml
+├── next-env.d.ts
+├── next.config.js
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── project-structure.txt
+├── public
+│   ├── icon.svg
+│   └── manifest.json
+├── scripts
+│   ├── e2e-live-forms.mjs
+│   └── live-forms.spec.js
+├── tailwind.config.ts
+├── test-results
+│   └── .last-run.json
+├── tsconfig.json
+└── tsconfig.tsbuildinfo
+
+45 directories, 132 files

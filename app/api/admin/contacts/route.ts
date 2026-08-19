@@ -1,39 +1,74 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getToken } from 'next-auth/jwt';
-import { ObjectId } from 'mongodb';
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 export const runtime = 'nodejs';
 
-export async function GET(request: Request) {
+async function authorized(request: Request) {
   const token = await getToken({ req: request as any, secret });
-  if (!token || token.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  return !!token && token.role === 'admin';
+}
+
+export async function GET(request: Request) {
+  if (!(await authorized(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const url = new URL(request.url);
   const status = url.searchParams.get('status');
 
-  const { db } = await connectToDatabase();
-  const query: any = {};
-  if (status) query.status = status;
+  let query = supabaseAdmin
+    .from('contacts')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(500);
 
-  const items = await db.collection('contacts').find(query).sort({ createdAt: -1 }).limit(500).toArray();
-  return NextResponse.json({ success: true, data: items });
+  if (status) {
+    query = query.eq('status', status);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true, data: data || [] });
 }
 
 export async function PUT(request: Request) {
-  const token = await getToken({ req: request as any, secret });
-  if (!token || token.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!(await authorized(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  const body = (await request.json().catch(() => ({}))) as any;
+  const body = await request.json().catch(() => ({}));
   const { id, status } = body;
-  if (!id || !status) return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
 
-  const { db } = await connectToDatabase();
+  if (!id || !status) {
+    return NextResponse.json(
+      { error: 'Missing id or status' },
+      { status: 400 }
+    );
+  }
 
-  const res = await db.collection('contacts').updateOne({ _id: new ObjectId(id) }, { $set: { status, updatedAt: new Date() } });
-  if (res.matchedCount === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const { data, error } = await supabaseAdmin
+    .from('contacts')
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select('id')
+    .single();
+
+  if (error || !data) {
+    return NextResponse.json(
+      { error: error?.message || 'Not found' },
+      { status: error ? 500 : 404 }
+    );
+  }
 
   return NextResponse.json({ success: true });
 }

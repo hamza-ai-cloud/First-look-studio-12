@@ -1,0 +1,442 @@
+app/not-found.tsx:40:          <Link href="/">
+app/not-found.tsx:46:          <Link href="/contact">
+app/not-found.tsx:55:          <Link href="/services" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-gold-400 transition-colors">
+app/career/page.tsx:12:  { title: 'Cinematic Videographer', type: 'Full-Time', location: 'On-Site', dept: 'Videography' },
+app/career/page.tsx:33:      const response = await fetch('/api/career', {
+app/gallery/page.tsx:5:import { galleryImages, portfolioImages } from '@/lib/pexels-data';
+app/gallery/page.tsx:10:const allGalleryImages = [...galleryImages, ...portfolioImages];
+app/gallery/page.tsx:27:            {allGalleryImages.map((img, i) => (
+app/gallery/page.tsx:77:              src={allGalleryImages[lightboxIndex].src.large}
+app/gallery/page.tsx:78:              alt={allGalleryImages[lightboxIndex].alt}
+app/portfolio/page.tsx:7:import { portfolioImages } from '@/lib/pexels-data';
+app/portfolio/page.tsx:36:  const nextImage = useCallback(() => {
+app/portfolio/page.tsx:39:  const prevImage = useCallback(() => {
+app/portfolio/page.tsx:47:      if (e.key === 'ArrowRight') nextImage();
+app/portfolio/page.tsx:48:      if (e.key === 'ArrowLeft') prevImage();
+app/portfolio/page.tsx:52:  }, [lightboxIndex, closeLightbox, nextImage, prevImage]);
+app/portfolio/page.tsx:98:                    src={portfolioImages[i % portfolioImages.length].src.large}
+app/portfolio/page.tsx:145:              onClick={(e) => { e.stopPropagation(); prevImage(); }}
+app/portfolio/page.tsx:151:              onClick={(e) => { e.stopPropagation(); nextImage(); }}
+app/portfolio/page.tsx:164:                src={portfolioImages[lightboxIndex % portfolioImages.length].src.large}
+app/faq/page.tsx:76:            <Link href="/contact">
+app/shop/page.tsx:7:import { productImages } from '@/lib/pexels-data';
+app/shop/page.tsx:122:              const img = productImages[i % productImages.length];
+app/shop/page.tsx:154:                      {Array.from({ length: 5 }).map((_, idx) => (
+app/shop/page.tsx:220:                    const img = productImages[products.indexOf(item) % productImages.length];
+app/admin/page.tsx:1:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/admin/page.tsx:13:    supabaseAdmin
+app/admin/page.tsx:14:      .from('bookings')
+app/admin/page.tsx:15:      .select('*')
+app/admin/page.tsx:19:    supabaseAdmin
+app/admin/page.tsx:20:      .from('contacts')
+app/admin/page.tsx:21:      .select('*')
+app/admin/page.tsx:25:    supabaseAdmin
+app/admin/page.tsx:26:      .from('services')
+app/admin/page.tsx:27:      .select('*')
+app/admin/page.tsx:30:    supabaseAdmin
+app/admin/page.tsx:31:      .from('gallery')
+app/admin/page.tsx:32:      .select('*')
+app/admin/signin/page.tsx:68:            backgroundImage: `
+app/admin/signin/page.tsx:479:              href="/"
+app/admin/bookings/page.tsx:1:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/admin/bookings/page.tsx:7:  const { data: bookings, error } = await supabaseAdmin
+app/admin/bookings/page.tsx:8:    .from('bookings')
+app/admin/bookings/page.tsx:9:    .select('*')
+app/admin/bookings/page.tsx:44:          await fetch('/api/admin/bookings', {
+app/services/page.tsx:11:const categories = ['All', 'Photography', 'Videography', 'Printing', 'Graphic Design'] as const;
+app/services/page.tsx:25:        subtitle="A complete creative suite — from cinematic photography and videography to premium printing and brand design."
+app/services/page.tsx:93:                    <Link href="/booking">
+app/testimonials/page.tsx:54:                  {Array.from({ length: 5 }).map((_, idx) => (
+app/terms/page.tsx:13:    body: 'First Look Studio provides photography, videography, digital printing, flex printing, graphic design, and related creative services. Specific service details, pricing, and availability are listed on our website and may change without notice. All services are subject to availability and scheduling constraints. We reserve the right to refuse service to anyone for any lawful reason.',
+app/terms/page.tsx:25:    body: 'All photographs, videos, designs, and creative work produced by First Look Studio remain our intellectual property until full payment is received. Upon payment, clients receive a personal-use license for their commissioned work. Commercial use, resale, or redistribution requires a separate commercial license. We retain the right to display work in our portfolio and marketing materials unless a privacy agreement is signed.',
+app/terms/page.tsx:33:    body: 'Standard delivery time for edited photos is 7-14 business days from the shoot date. Video projects require 14-30 business days depending on complexity. Rush delivery is available for an additional 50% fee with a guaranteed 48-hour turnaround for photos and 7-day turnaround for videos. Printed products are delivered within 5-10 business days after design approval.',
+app/layout.tsx:27:  metadataBase: new URL('https://firstlookstudio.com'),
+app/layout.tsx:29:    default: 'First Look Studio | Premium Photography, Videography & Printing',
+app/layout.tsx:33:    'First Look Studio offers luxury photography, videography, digital & flex printing, wedding photography, passport photos, graphic design, mug & t-shirt printing, and large format printing.',
+app/layout.tsx:36:    'videography',
+app/layout.tsx:56:    title: 'First Look Studio | Premium Photography, Videography & Printing',
+app/layout.tsx:58:      'Luxury photography, videography, and printing services. Capturing your precious moments with cinematic artistry.',
+app/layout.tsx:61:    card: 'summary_large_image',
+app/layout.tsx:64:      'Luxury photography, videography, and printing services. Capturing your precious moments with cinematic artistry.',
+app/layout.tsx:73:      'max-image-preview': 'large',
+app/layout.tsx:75:      'max-video-preview': -1,
+app/layout.tsx:89:        <link rel="preconnect" href="https://images.pexels.com" crossOrigin="anonymous" />
+app/layout.tsx:90:        <link rel="dns-prefetch" href="https://images.pexels.com" />
+app/contact/page.tsx:20:      const response = await fetch('/api/contact', {
+app/contact/page.tsx:67:                  <a key={i} href={item.href} className="flex items-center gap-4 glass-card p-4 rounded-xl hover:gold-border transition-all group">
+app/contact/page.tsx:81:                <a href="https://wa.me/+923222549513" target="_blank" rel="noopener noreferrer">
+app/contact/page.tsx:84:                    WhatsApp
+app/contact/page.tsx:87:                <a href="tel:+923222549513">
+app/contact/page.tsx:97:              <div className="mt-6 glass-card rounded-2xl overflow-hidden aspect-video relative">
+app/globals.css:179:  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+app/api/career/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/career/route.ts:33:    const { error } = await supabaseAdmin
+app/api/career/route.ts:34:  .from('careers')
+app/api/career/route.ts:35:  .insert({
+app/api/admin/bookings/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/admin/bookings/route.ts:5:const secret = process.env.NEXTAUTH_SECRET;
+app/api/admin/bookings/route.ts:23:  let query = supabaseAdmin
+app/api/admin/bookings/route.ts:24:    .from('bookings')
+app/api/admin/bookings/route.ts:25:    .select('*')
+app/api/admin/bookings/route.ts:61:  const { data, error } = await supabaseAdmin
+app/api/admin/bookings/route.ts:62:    .from('bookings')
+app/api/admin/bookings/route.ts:63:    .update({
+app/api/admin/bookings/route.ts:68:    .select('id')
+app/api/admin/contacts/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/admin/contacts/route.ts:5:const secret = process.env.NEXTAUTH_SECRET;
+app/api/admin/contacts/route.ts:22:  let query = supabaseAdmin
+app/api/admin/contacts/route.ts:23:    .from('contacts')
+app/api/admin/contacts/route.ts:24:    .select('*')
+app/api/admin/contacts/route.ts:56:  const { data, error } = await supabaseAdmin
+app/api/admin/contacts/route.ts:57:    .from('contacts')
+app/api/admin/contacts/route.ts:58:    .update({
+app/api/admin/contacts/route.ts:63:    .select('id')
+app/api/health/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/health/route.ts:8:    const { count, error } = await supabaseAdmin
+app/api/health/route.ts:9:      .from('bookings')
+app/api/health/route.ts:10:      .select('id', { count: 'exact', head: true });
+app/api/health/route.ts:18:      supabase: 'connected',
+app/api/admin-check/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/admin-check/route.ts:6:    const { count, error } = await supabaseAdmin
+app/api/admin-check/route.ts:7:      .from('admins')
+app/api/admin-check/route.ts:8:      .select('id', { count: 'exact', head: true });
+app/api/contact/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/contact/route.ts:45:    const { data, error } = await supabaseAdmin
+app/api/contact/route.ts:46:  .from('contacts')
+app/api/contact/route.ts:47:  .insert({
+app/api/contact/route.ts:54:  .select('id')
+app/api/booking/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/booking/route.ts:54:   const { data, error } = await supabaseAdmin
+app/api/booking/route.ts:55:  .from('bookings')
+app/api/booking/route.ts:56:  .insert({
+app/api/booking/route.ts:68:  .select('id')
+app/api/supabase-test/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/supabase-test/route.ts:6:    const { data, error } = await supabaseAdmin
+app/api/supabase-test/route.ts:7:      .from('bookings')
+app/api/supabase-test/route.ts:8:      .select('id')
+app/api/supabase-test/route.ts:17:      supabase: 'connected',
+app/api/supabase-test/route.ts:21:    console.error('Supabase test error:', error);
+app/api/newsletter/route.ts:2:import { supabaseAdmin } from '@/lib/supabaseAdmin';
+app/api/newsletter/route.ts:16:    const { data: existing, error: existingError } = await supabaseAdmin
+app/api/newsletter/route.ts:17:  .from('newsletter_subscribers')
+app/api/newsletter/route.ts:18:  .select('id')
+app/api/newsletter/route.ts:33:    const { error } = await supabaseAdmin
+app/api/newsletter/route.ts:34:  .from('newsletter_subscribers')
+app/api/newsletter/route.ts:35:  .insert({
+app/api/auth/[...nextauth]/route.ts:1:import NextAuth from 'next-auth';
+app/api/auth/[...nextauth]/route.ts:2:import { authOptions } from '@/lib/auth';
+app/api/auth/[...nextauth]/route.ts:4:const handler = NextAuth(authOptions as any);
+app/about/page.tsx:5:import { aboutImages } from '@/lib/pexels-data';
+app/about/page.tsx:29:                <img src={aboutImages[0].src.large} alt={aboutImages[0].alt} className="w-full h-full object-cover" />
+app/about/page.tsx:33:                  <img src={aboutImages[1].src.large} alt={aboutImages[1].alt} className="w-full h-full object-cover" />
+app/about/page.tsx:36:                  <img src={aboutImages[2].src.large} alt={aboutImages[2].alt} className="w-full h-full object-cover" />
+app/pricing/page.tsx:55:                <Link href="/booking" className="mt-8">
+app/pricing/page.tsx:109:              Need a custom package? <Link href="/contact" className="text-gold-400 hover:text-gold-300">Contact us</Link> for a personalized quote.
+app/booking/page.tsx:13:  { id: '2', name: 'Marcus Chen', specialty: 'Events & Videography' },
+app/booking/page.tsx:49:      const response = await fetch('/api/booking', {
+app/booking/page.tsx:123:                        onClick={() => update('service', s.title)}
+app/booking/page.tsx:146:                        onClick={() => update('package', p.name)}
+app/booking/page.tsx:177:                        onChange={(e) => update('date', e.target.value)}
+app/booking/page.tsx:188:                            onClick={() => update('time', t)}
+app/booking/page.tsx:212:                        onClick={() => update('photographer', p.name)}
+app/booking/page.tsx:258:                        onChange={(e) => update('name', e.target.value)}
+app/booking/page.tsx:265:                        onChange={(e) => update('email', e.target.value)}
+app/booking/page.tsx:273:                      onChange={(e) => update('phone', e.target.value)}
+app/booking/page.tsx:279:                      onChange={(e) => update('notes', e.target.value)}
+app/blog/page.tsx:7:import { blogImages } from '@/lib/pexels-data';
+app/blog/page.tsx:11:const categories = ['All', 'Wedding', 'Photography', 'Videography', 'Printing', 'Design', 'Lifestyle'];
+app/blog/page.tsx:79:                  <Link href={`/blog/${post.slug}`}>
+app/blog/page.tsx:83:                          src={blogImages[i % blogImages.length].src.large}
+app/blog/[slug]/page.tsx:7:import { blogImages } from '@/lib/pexels-data';
+app/blog/[slug]/page.tsx:16:  const img = blogImages[postIndex % blogImages.length];
+app/blog/[slug]/page.tsx:23:      {/* Hero image */}
+app/blog/[slug]/page.tsx:78:              During the shoot, our photographers and videographers work seamlessly together, coordinating
+app/blog/[slug]/page.tsx:95:          <Link href="/blog">
+app/blog/[slug]/page.tsx:114:              <Link key={rp.slug} href={`/blog/${rp.slug}`}>
+app/blog/[slug]/page.tsx:123:                    <img src={blogImages[(postIndex + i + 1) % blogImages.length].src.large} alt={rp.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+components/layout/footer.tsx:4:import { Camera, Facebook, Instagram, Youtube, Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react';
+components/layout/footer.tsx:11:      { label: 'Videography', href: '/services' },
+components/layout/footer.tsx:47:    phoneHref: 'tel:+923218282444',
+components/layout/footer.tsx:48:    whatsappHref: 'https://wa.me/923218282444',
+components/layout/footer.tsx:50:    emailHref: 'mailto:helplinestudio@gmail.com',
+components/layout/footer.tsx:60:    phoneHref: 'tel:+923052288884',
+components/layout/footer.tsx:61:    whatsappHref: 'https://wa.me/923052288884',
+components/layout/footer.tsx:63:    emailHref: 'mailto:helplinestudio@gmail.com',
+components/layout/footer.tsx:73:    phoneHref: 'tel:+923222549513',
+components/layout/footer.tsx:74:    whatsappHref: 'https://wa.me/923222549513',
+components/layout/footer.tsx:76:    emailHref: 'mailto:firstlookkashif@gmail.com',
+components/layout/footer.tsx:88:            <Link href="/" className="flex items-center gap-2 mb-4">
+components/layout/footer.tsx:100:              Premium photography, videography, and printing studio. We capture
+components/layout/footer.tsx:105:              {[Facebook, Instagram, Youtube].map((Icon, i) => (
+components/layout/footer.tsx:108:                  href="#"
+components/layout/footer.tsx:128:                      href={link.href}
+components/layout/footer.tsx:148:                href={branch.maps}
+components/layout/footer.tsx:158:                href={branch.phoneHref}
+components/layout/footer.tsx:165:                href={branch.whatsappHref}
+components/layout/footer.tsx:171:                <span>WhatsApp</span>
+components/layout/footer.tsx:174:                href={branch.emailHref}
+components/layout/navbar.tsx:70:          <Link href="/" className="flex items-center gap-2 group">
+components/layout/navbar.tsx:90:              <NavLink key={link.href} href={link.href} active={pathname === link.href}>
+components/layout/navbar.tsx:117:                          href={link.href}
+components/layout/navbar.tsx:146:            <Link href="/booking" className="hidden sm:block">
+components/layout/navbar.tsx:204:                      href={link.href}
+components/layout/navbar.tsx:217:              <Link href="/booking" className="mt-6 block">
+components/layout/navbar.tsx:241:      href={href}
+components/admin/ServicesView.tsx:38:  const [formCategory, setFormCategory] = useState<'photography' | 'videography' | 'editing' | 'custom'>('photography');
+components/admin/ServicesView.tsx:43:  const [formFeatures, setFormFeatures] = useState<string>('2 Lead Photographers\nOnline Gallery\nHigh-Res Retouched Images');
+components/admin/ServicesView.tsx:44:  const [formImage, setFormImage] = useState('');
+components/admin/ServicesView.tsx:66:    setFormImage('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800');
+components/admin/ServicesView.tsx:81:    setFormImage(s.image_url || '');
+components/admin/ServicesView.tsx:105:      image_url: formImage.trim(),
+components/admin/ServicesView.tsx:123:            Manage photography, videography, and commercial offerings displayed on the public site.
+components/admin/ServicesView.tsx:186:                  <div className="relative aspect-video bg-[#0d1117] overflow-hidden">
+components/admin/ServicesView.tsx:188:                      src={item.image_url}
+components/admin/ServicesView.tsx:192:                        (e.target as HTMLImageElement).src =
+components/admin/ServicesView.tsx:193:                          'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800';
+components/admin/ServicesView.tsx:324:                    <option value="videography">Videography</option>
+components/admin/ServicesView.tsx:381:                <label className="font-semibold text-white">Cover Image URL</label>
+components/admin/ServicesView.tsx:384:                  value={formImage}
+components/admin/ServicesView.tsx:385:                  onChange={(e) => setFormImage(e.target.value)}
+components/admin/ServicesView.tsx:386:                  placeholder="https://images.unsplash.com/..."
+components/admin/GalleryView.tsx:5:  Image as ImageIcon,
+components/admin/GalleryView.tsx:19:  onSaveItem: (item: Partial<GalleryItemRecord> & { title: string; image_url: string }) => Promise<void> | void;
+components/admin/GalleryView.tsx:38:  const [formImageUrl, setFormImageUrl] = useState('');
+components/admin/GalleryView.tsx:55:    setFormImageUrl('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800');
+components/admin/GalleryView.tsx:65:    setFormImageUrl(item.image_url);
+components/admin/GalleryView.tsx:73:    if (!formTitle.trim() || !formImageUrl.trim()) return;
+components/admin/GalleryView.tsx:79:      image_url: formImageUrl.trim(),
+components/admin/GalleryView.tsx:93:            <ImageIcon className="w-5 h-5 text-purple-400" />
+components/admin/GalleryView.tsx:97:            Organize photography and video stills, categorize by theme, and manage featured homepage showcases.
+components/admin/GalleryView.tsx:163:          <ImageIcon className="w-12 h-12 text-[#484f58] mx-auto mb-3" />
+components/admin/GalleryView.tsx:182:                    src={item.image_url}
+components/admin/GalleryView.tsx:186:                      (e.target as HTMLImageElement).src =
+components/admin/GalleryView.tsx:187:                        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800';
+components/admin/GalleryView.tsx:293:                <label className="font-semibold text-white">High-Resolution Image URL *</label>
+components/admin/GalleryView.tsx:297:                  value={formImageUrl}
+components/admin/GalleryView.tsx:298:                  onChange={(e) => setFormImageUrl(e.target.value)}
+components/admin/GalleryView.tsx:299:                  placeholder="https://images.unsplash.com/..."
+components/admin/GalleryView.tsx:302:                {formImageUrl && (
+components/admin/GalleryView.tsx:303:                  <div className="mt-2 aspect-video rounded-xl overflow-hidden border border-[#30363d] bg-black">
+components/admin/GalleryView.tsx:304:                    <img src={formImageUrl} alt="Preview" className="w-full h-full object-cover" />
+components/admin/MessagesView.tsx:193:                      href={`mailto:${c.email}?subject=Regarding Your Inquiry - First Look Studio`}
+components/admin/DashboardView.tsx:187:              href="/"
+components/admin/DashboardView.tsx:235:          href="/admin/bookings"
+components/admin/DashboardView.tsx:420:              href="/admin/bookings"
+components/admin/DashboardView.tsx:431:              href="/admin/messages"
+components/admin/DashboardView.tsx:442:              href="/admin/services"
+components/admin/DashboardView.tsx:453:              href="/admin/gallery"
+components/admin/DashboardView.tsx:488:              href="/admin/bookings"
+components/admin/DashboardView.tsx:677:              href="/admin/messages"
+components/admin/BookingsView.tsx:317:                href={`mailto:${selectedBooking.client_email}?subject=Booking Update - First Look Studio`}
+components/sections/about-preview.tsx:4:import { aboutImages } from '@/lib/pexels-data';
+components/sections/about-preview.tsx:11:          {/* Images */}
+components/sections/about-preview.tsx:22:                  src={aboutImages[0].src.large}
+components/sections/about-preview.tsx:23:                  alt={aboutImages[0].alt}
+components/sections/about-preview.tsx:30:                  src={aboutImages[2].src.large}
+components/sections/about-preview.tsx:31:                  alt={aboutImages[2].alt}
+components/sections/about-preview.tsx:46:                  src={aboutImages[1].src.large}
+components/sections/about-preview.tsx:47:                  alt={aboutImages[1].alt}
+components/sections/about-preview.tsx:82:              Our team of award-winning photographers, videographers, and
+components/sections/newsletter-section.tsx:19:      const response = await fetch('/api/newsletter', {
+components/sections/cta-section.tsx:33:              <Link href="/booking">
+components/sections/cta-section.tsx:44:                href="https://wa.me/923222549513"
+components/sections/cta-section.tsx:53:                  WhatsApp
+components/sections/our-branches-section.tsx:14:    phoneHref: 'tel:+923218282444',
+components/sections/our-branches-section.tsx:16:    emailHref: 'mailto:helplinestudio@gmail.com',
+components/sections/our-branches-section.tsx:26:    phoneHref: 'tel:+923052288884',
+components/sections/our-branches-section.tsx:28:    emailHref: 'mailto:helplinestudio@gmail.com',
+components/sections/our-branches-section.tsx:38:    phoneHref: 'tel:+923222549513',
+components/sections/our-branches-section.tsx:40:    emailHref: 'mailto:firstlookkashif@gmail.com',
+components/sections/our-branches-section.tsx:93:                  href={branch.maps}
+components/sections/our-branches-section.tsx:104:                  href={branch.phoneHref}
+components/sections/our-branches-section.tsx:112:                  href={branch.emailHref}
+components/sections/featured-gallery.tsx:4:import { galleryImages } from '@/lib/pexels-data';
+components/sections/featured-gallery.tsx:7:  const images = galleryImages;
+components/sections/featured-gallery.tsx:28:          {images.map((img, i) => (
+components/sections/testimonials-section.tsx:41:                {Array.from({ length: 5 }).map((_, idx) => (
+components/sections/blog-preview.tsx:7:import { blogImages } from '@/lib/pexels-data';
+components/sections/blog-preview.tsx:29:          <Link href="/blog">
+components/sections/blog-preview.tsx:46:              <Link href={`/blog/${post.slug}`}>
+components/sections/blog-preview.tsx:50:                      src={blogImages[i]?.src.large}
+components/sections/hero-section.tsx:72:          <Link href="/booking">
+components/sections/hero-section.tsx:81:          <Link href="/portfolio">
+components/sections/services-slider.tsx:33:                <Link href={`/services#${service.slug}`}>
+components/sections/services-slider.tsx:63:          <Link href="/services">
+components/ui/avatar.tsx:23:const AvatarImage = React.forwardRef<
+components/ui/avatar.tsx:24:  React.ElementRef<typeof AvatarPrimitive.Image>,
+components/ui/avatar.tsx:25:  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+components/ui/avatar.tsx:27:  <AvatarPrimitive.Image
+components/ui/avatar.tsx:33:AvatarImage.displayName = AvatarPrimitive.Image.displayName;
+components/ui/avatar.tsx:50:export { Avatar, AvatarImage, AvatarFallback };
+components/ui/carousel.tsx:114:      onSelect(api);
+components/ui/chart.tsx:55:          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+lib/data.ts:4:  category: 'Photography' | 'Videography' | 'Printing' | 'Graphic Design';
+lib/data.ts:52:    description: 'Stunning aerial photography and videography for any occasion.',
+lib/data.ts:54:    features: ['4K aerial video', '50+ aerial photos', 'Licensed pilot', 'Same-day delivery'],
+lib/data.ts:58:    slug: 'videography',
+lib/data.ts:59:    title: 'Cinematic Videography',
+lib/data.ts:60:    category: 'Videography',
+lib/data.ts:62:    icon: 'Video',
+lib/data.ts:125:    icon: 'Image',
+lib/data.ts:238:  image: string;
+lib/data.ts:251:    image: '',
+lib/data.ts:261:    image: '',
+lib/data.ts:272:    image: '',
+lib/data.ts:282:    image: '',
+lib/data.ts:292:    image: '',
+lib/data.ts:302:    image: '',
+lib/data.ts:312:    image: '',
+lib/data.ts:321:    image: '',
+lib/data.ts:332:  image: string;
+lib/data.ts:337:  { id: 'pf1', title: 'Eternal Vows', category: 'Wedding', image: '', description: 'A grand wedding celebration captured in cinematic detail.' },
+lib/data.ts:338:  { id: 'pf2', title: 'Urban Elegance', category: 'Portrait', image: '', description: 'Fashion portrait session with dramatic studio lighting.' },
+lib/data.ts:339:  { id: 'pf3', title: 'Concert Lights', category: 'Event', image: '', description: 'Live concert photography with dynamic stage lighting.' },
+lib/data.ts:340:  { id: 'pf4', title: 'Golden Hour Bride', category: 'Wedding', image: '', description: 'Outdoor wedding portraits during golden hour.' },
+lib/data.ts:341:  { id: 'pf5', title: 'Brand Identity', category: 'Design', image: '', description: 'Complete brand identity system for a luxury brand.' },
+lib/data.ts:342:  { id: 'pf6', title: 'Custom Prints', category: 'Printing', image: '', description: 'Premium business cards with gold foil stamping.' },
+lib/data.ts:343:  { id: 'pf7', title: 'Fashion Story', category: 'Portrait', image: '', description: 'Editorial fashion shoot for a designer collection.' },
+lib/data.ts:344:  { id: 'pf8', title: 'Festival Night', category: 'Event', image: '', description: 'Music festival coverage with crowd and stage shots.' },
+lib/data.ts:345:  { id: 'pf9', title: 'Studio Session', category: 'Portrait', image: '', description: 'Minimal studio portrait with dramatic lighting.' },
+lib/data.ts:346:  { id: 'pf10', title: 'Intimate Ceremony', category: 'Wedding', image: '', description: 'Small wedding ceremony with emotional candid moments.' },
+lib/data.ts:347:  { id: 'pf11', title: 'Product Launch', category: 'Event', image: '', description: 'Corporate product launch event photography.' },
+lib/data.ts:348:  { id: 'pf12', title: 'Custom Merch', category: 'Printing', image: '', description: 'Branded t-shirt and mug printing for a startup.' },
+lib/data.ts:424:  image: string;
+lib/data.ts:436:    image: '',
+lib/data.ts:446:    image: '',
+lib/data.ts:449:    slug: 'cinematic-videography-guide',
+lib/data.ts:450:    title: 'The Art of Cinematic Videography: A Complete Guide',
+lib/data.ts:453:    category: 'Videography',
+lib/data.ts:456:    image: '',
+lib/data.ts:466:    image: '',
+lib/data.ts:476:    image: '',
+lib/data.ts:486:    image: '',
+lib/supabaseAdmin.ts:1:import { createClient } from '@supabase/supabase-js';
+lib/supabaseAdmin.ts:3:const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+lib/supabaseAdmin.ts:4:const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+lib/supabaseAdmin.ts:6:if (!supabaseUrl) {
+lib/supabaseAdmin.ts:7:  throw new Error('NEXT_PUBLIC_SUPABASE_URL is missing');
+lib/supabaseAdmin.ts:10:if (!supabaseServiceRoleKey) {
+lib/supabaseAdmin.ts:11:  throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing');
+lib/supabaseAdmin.ts:14:export const supabaseAdmin = createClient(
+lib/supabaseAdmin.ts:15:  supabaseUrl,
+lib/supabaseAdmin.ts:16:  supabaseServiceRoleKey,
+lib/pexels-data.ts:1:export type PexelsImage = {
+lib/pexels-data.ts:6:export const galleryImages: PexelsImage[] = [
+lib/pexels-data.ts:9:      large: 'https://images.pexels.com/photos/6047175/pexels-photo-6047175.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:10:      medium: 'https://images.pexels.com/photos/6047175/pexels-photo-6047175.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:11:      small: 'https://images.pexels.com/photos/6047175/pexels-photo-6047175.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:17:      large: 'https://images.pexels.com/photos/38627016/pexels-photo-38627016.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:18:      medium: 'https://images.pexels.com/photos/38627016/pexels-photo-38627016.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:19:      small: 'https://images.pexels.com/photos/38627016/pexels-photo-38627016.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:25:      large: 'https://images.pexels.com/photos/37233404/pexels-photo-37233404.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:26:      medium: 'https://images.pexels.com/photos/37233404/pexels-photo-37233404.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:27:      small: 'https://images.pexels.com/photos/37233404/pexels-photo-37233404.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:33:      large: 'https://images.pexels.com/photos/13230484/pexels-photo-13230484.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:34:      medium: 'https://images.pexels.com/photos/13230484/pexels-photo-13230484.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:35:      small: 'https://images.pexels.com/photos/13230484/pexels-photo-13230484.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:41:      large: 'https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:42:      medium: 'https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:43:      small: 'https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:49:      large: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:50:      medium: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:51:      small: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:57:      large: 'https://images.pexels.com/photos/3024995/pexels-photo-3024995.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:58:      medium: 'https://images.pexels.com/photos/3024995/pexels-photo-3024995.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:59:      small: 'https://images.pexels.com/photos/3024995/pexels-photo-3024995.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:65:      large: 'https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:66:      medium: 'https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:67:      small: 'https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:73:export const portfolioImages: PexelsImage[] = [
+lib/pexels-data.ts:76:      large: 'https://images.pexels.com/photos/6047175/pexels-photo-6047175.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:77:      medium: 'https://images.pexels.com/photos/6047175/pexels-photo-6047175.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:78:      small: 'https://images.pexels.com/photos/6047175/pexels-photo-6047175.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:84:      large: 'https://images.pexels.com/photos/38867673/pexels-photo-38867673.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:85:      medium: 'https://images.pexels.com/photos/38867673/pexels-photo-38867673.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:86:      small: 'https://images.pexels.com/photos/38867673/pexels-photo-38867673.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:92:      large: 'https://images.pexels.com/photos/37233404/pexels-photo-37233404.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:93:      medium: 'https://images.pexels.com/photos/37233404/pexels-photo-37233404.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:94:      small: 'https://images.pexels.com/photos/37233404/pexels-photo-37233404.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:100:      large: 'https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:101:      medium: 'https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:102:      small: 'https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:108:      large: 'https://images.pexels.com/photos/13230484/pexels-photo-13230484.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:109:      medium: 'https://images.pexels.com/photos/13230484/pexels-photo-13230484.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:110:      small: 'https://images.pexels.com/photos/13230484/pexels-photo-13230484.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:116:      large: 'https://images.pexels.com/photos/4218027/pexels-photo-4218027.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:117:      medium: 'https://images.pexels.com/photos/4218027/pexels-photo-4218027.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:118:      small: 'https://images.pexels.com/photos/4218027/pexels-photo-4218027.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:124:      large: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:125:      medium: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:126:      small: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:132:      large: 'https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:133:      medium: 'https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:134:      small: 'https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:140:      large: 'https://images.pexels.com/photos/18794493/pexels-photo-18794493.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:141:      medium: 'https://images.pexels.com/photos/18794493/pexels-photo-18794493.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:142:      small: 'https://images.pexels.com/photos/18794493/pexels-photo-18794493.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:148:      large: 'https://images.pexels.com/photos/5919063/pexels-photo-5919063.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:149:      medium: 'https://images.pexels.com/photos/5919063/pexels-photo-5919063.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:150:      small: 'https://images.pexels.com/photos/5919063/pexels-photo-5919063.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:156:      large: 'https://images.pexels.com/photos/6652686/pexels-photo-6652686.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:157:      medium: 'https://images.pexels.com/photos/6652686/pexels-photo-6652686.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:158:      small: 'https://images.pexels.com/photos/6652686/pexels-photo-6652686.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:164:      large: 'https://images.pexels.com/photos/167605/pexels-photo-167605.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:165:      medium: 'https://images.pexels.com/photos/167605/pexels-photo-167605.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:166:      small: 'https://images.pexels.com/photos/167605/pexels-photo-167605.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:172:export const productImages: PexelsImage[] = [
+lib/pexels-data.ts:175:      large: 'https://images.pexels.com/photos/3024995/pexels-photo-3024995.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:176:      medium: 'https://images.pexels.com/photos/3024995/pexels-photo-3024995.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:177:      small: 'https://images.pexels.com/photos/3024995/pexels-photo-3024995.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:183:      large: 'https://images.pexels.com/photos/5978721/pexels-photo-5978721.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:184:      medium: 'https://images.pexels.com/photos/5978721/pexels-photo-5978721.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:185:      small: 'https://images.pexels.com/photos/5978721/pexels-photo-5978721.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:191:      large: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:192:      medium: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:193:      small: 'https://images.pexels.com/photos/3493047/pexels-photo-3493047.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:199:      large: 'https://images.pexels.com/photos/18682345/pexels-photo-18682345.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:200:      medium: 'https://images.pexels.com/photos/18682345/pexels-photo-18682345.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:201:      small: 'https://images.pexels.com/photos/18682345/pexels-photo-18682345.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:207:      large: 'https://images.pexels.com/photos/8101470/pexels-photo-8101470.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:208:      medium: 'https://images.pexels.com/photos/8101470/pexels-photo-8101470.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:209:      small: 'https://images.pexels.com/photos/8101470/pexels-photo-8101470.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:215:      large: 'https://images.pexels.com/photos/6312228/pexels-photo-6312228.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:216:      medium: 'https://images.pexels.com/photos/6312228/pexels-photo-6312228.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:217:      small: 'https://images.pexels.com/photos/6312228/pexels-photo-6312228.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:223:export const blogImages: PexelsImage[] = [
+lib/pexels-data.ts:226:      large: 'https://images.pexels.com/photos/19354137/pexels-photo-19354137.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:227:      medium: 'https://images.pexels.com/photos/19354137/pexels-photo-19354137.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:228:      small: 'https://images.pexels.com/photos/19354137/pexels-photo-19354137.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:234:      large: 'https://images.pexels.com/photos/32167154/pexels-photo-32167154.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:235:      medium: 'https://images.pexels.com/photos/32167154/pexels-photo-32167154.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:236:      small: 'https://images.pexels.com/photos/32167154/pexels-photo-32167154.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:242:      large: 'https://images.pexels.com/photos/27893069/pexels-photo-27893069.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:243:      medium: 'https://images.pexels.com/photos/27893069/pexels-photo-27893069.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:244:      small: 'https://images.pexels.com/photos/27893069/pexels-photo-27893069.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:250:export const aboutImages: PexelsImage[] = [
+lib/pexels-data.ts:253:      large: 'https://images.pexels.com/photos/19685615/pexels-photo-19685615.jpeg?auto=compress&cs=tinysrgb&w=940&h=650',
+lib/pexels-data.ts:254:      medium: 'https://images.pexels.com/photos/19685615/pexels-photo-19685615.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:255:      small: 'https://images.pexels.com/photos/19685615/pexels-photo-19685615.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:261:      large: 'https://images.pexels.com/photos/37033778/pexels-photo-37033778.jpeg',
+lib/pexels-data.ts:262:      medium: 'https://images.pexels.com/photos/33273434/pexels-photo-33273434.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:263:      small: 'https://images.pexels.com/photos/33273434/pexels-photo-33273434.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/pexels-data.ts:269:      large: 'https://images.pexels.com/photos/26736630/pexels-photo-26736630.jpeg',
+lib/pexels-data.ts:270:      medium: 'https://images.pexels.com/photos/16029823/pexels-photo-16029823.jpeg?auto=compress&cs=tinysrgb&w=600',
+lib/pexels-data.ts:271:      small: 'https://images.pexels.com/photos/16029823/pexels-photo-16029823.jpeg?auto=compress&cs=tinysrgb&w=400',
+lib/types.ts:44:  image?: string;
+lib/types.ts:45:  image_url: string;
+lib/auth.ts:1:import NextAuth, { NextAuthOptions } from 'next-auth';
+lib/auth.ts:3:import { supabaseAdmin } from './supabaseAdmin';
+lib/auth.ts:6:export const authOptions: NextAuthOptions = {
+lib/auth.ts:25:        const { data: user, error } = await supabaseAdmin
+lib/auth.ts:26:          .from('admins')
+lib/auth.ts:27:          .select('*')
+lib/auth.ts:79:  secret: process.env.NEXTAUTH_SECRET,
+lib/auth.ts:82:export default NextAuth(authOptions);
+utils/supabase/server.ts:1:import { createServerClient } from '@supabase/ssr'
+utils/supabase/server.ts:8:    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+utils/supabase/server.ts:9:    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+utils/supabase/client.ts:1:import { createBrowserClient } from '@supabase/ssr'
+utils/supabase/client.ts:5:    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+utils/supabase/client.ts:6:    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+middleware.ts:18:    const tokenSignIn = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+middleware.ts:25:  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });

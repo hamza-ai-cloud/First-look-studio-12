@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { sendEmail, sendAdminNotification } from '@/lib/email';
 import { isValidEmail, isValidPhone, normalizeText } from '@/lib/validators';
 
@@ -51,21 +51,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Please enter a valid phone number.' }, { status: 400 });
     }
 
-    const { db } = await connectToDatabase();
+   const { data, error } = await supabaseAdmin
+  .from('bookings')
+  .insert({
+    service,
+    package: packageName,
+    date,
+    time,
+    photographer,
+    name,
+    email,
+    phone,
+    notes,
+    status: 'pending',
+  })
+  .select('id')
+  .single();
 
-    const result = await db.collection('bookings').insertOne({
-      service,
-      package: packageName,
-      date,
-      time,
-      photographer,
-      name,
-      email,
-      phone,
-      notes,
-      status: 'pending',
-      createdAt: new Date(),
-    });
+if (error) {
+  throw error;
+}
 
     // Send notifications (safe no-op if email not configured)
     try {
@@ -89,7 +94,7 @@ export async function POST(request: Request) {
         success: true,
         message: 'Booking request submitted successfully. We will contact you to confirm your session.',
         data: {
-          id: result.insertedId.toString(),
+          id: data.id,
         },
       },
       { status: 201 },

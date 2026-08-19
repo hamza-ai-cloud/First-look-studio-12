@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isValidEmail, normalizeText } from '@/lib/validators';
 
 export const runtime = 'nodejs';
@@ -30,18 +30,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Please provide a brief summary of your experience.' }, { status: 400 });
     }
 
-    const { db } = await connectToDatabase();
+    const { error } = await supabaseAdmin
+  .from('careers')
+  .insert({
+    name,
+    email,
+    position,
+    portfolio: portfolio || null,
+    message,
+    status: 'new',
+  });
 
-    await db.collection('careers').insertOne({
-      name,
-      email,
-      position,
-      portfolio: portfolio || null,
-      message,
-      status: 'new',
-      createdAt: new Date(),
-    });
-
+if (error) {
+  throw error;
+}
     return NextResponse.json({
       success: true,
       message: 'Application submitted successfully. Our team will review it shortly.',
