@@ -1,23 +1,40 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getToken } from 'next-auth/jwt';
-
-const secret = process.env.NEXTAUTH_SECRET;
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
 
+const secret = process.env.NEXTAUTH_SECRET;
+
+const CONTACT_STATUSES = [
+  'new',
+  'read',
+  'replied',
+  'archived',
+] as const;
+
 async function authorized(request: Request) {
-  const token = await getToken({ req: request as any, secret });
-  return !!token && token.role === 'admin';
+  const token = await getToken({
+    req: request as any,
+    secret,
+  });
+
+  const role = token?.role ? String(token.role) : '';
+
+  return role === 'admin' || role === 'super_admin';
 }
 
 export async function GET(request: Request) {
   if (!(await authorized(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
   }
 
   const url = new URL(request.url);
   const status = url.searchParams.get('status');
+  const search = url.searchParams.get('q');
 
   let query = supabaseAdmin
     .from('contacts')
@@ -25,50 +42,229 @@ export async function GET(request: Request) {
     .order('created_at', { ascending: false })
     .limit(500);
 
-  if (status) {
+  if (
+    status &&
+    CONTACT_STATUSES.includes(
+      status as (typeof CONTACT_STATUSES)[number]
+    )
+  ) {
     query = query.eq('status', status);
+  }
+
+  if (search) {
+    const term = search.replace(/[%_]/g, '\\$&');
+
+    query = query.or(
+      `name.ilike.%${term}%,email.ilike.%${term}%,subject.ilike.%${term}%,message.ilike.%${term}%`
+    );
   }
 
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 
-  return NextResponse.json({ success: true, data: data || [] });
+  return NextResponse.json({
+    success: true,
+    data: data || [],
+  });
+}
+
+export async function POST(request: Request) {
+  if (!(await authorized(request))) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const name = String(body.name || '').trim();
+    const email = String(body.email || '').trim().toLowerCase();
+    const subject = String(body.subject || '').trim();
+    const message = String(body.message || '').trim();
+
+    if (!name || !email || !subject || !message) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Name, email, subject and message are required',
+        },
+        { status: 400 }
+      );
+    }
+
+    const status = body.status || 'new';
+
+    if (!CONTACT_STATUSES.includes(status)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid contact status' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('contacts')
+      .insert({
+        name,
+        email,
+        subject,
+        message,
+        status,
+      })
+      .select('*')
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        data,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Invalid request',
+      },
+      { status: 400 }
+    );
+  }
 }
 
 export async function PUT(request: Request) {
   if (!(await authorized(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
   }
 
-  const body = await request.json().catch(() => ({}));
-  const { id, status } = body;
+  try {
+    const body = await request.json();
+    const id = String(body.id || '').trim();
 
-  if (!id || !status) {
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Contact id is required' },
+        { status: 400 }
+      );
+    }
+
+    const updates: Record<string, unknown> = {};
+
+    const allowedFields = [
+      'name',
+      'email',
+      'subject',
+      'message',
+      'status',
+    ];
+
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updates[field] = body[field];
+      }
+    }
+
+    if (
+      updates.status !== undefined &&
+      !CONTACT_STATUSES.includes(
+        String(updates.status) as (typeof CONTACT_STATUSES)[number]
+      )
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid contact status' },
+        { status: 400 }
+      );
+    }
+
+    updates.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabaseAdmin
+      .from('contacts')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error?.message || 'Contact not found',
+        },
+        { status: error ? 500 : 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
     return NextResponse.json(
-      { error: 'Missing id or status' },
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Invalid request',
+      },
+      { status: 400 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  if (!(await authorized(request))) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+
+  if (!id) {
+    return NextResponse.json(
+      { success: false, error: 'Contact id is required' },
       { status: 400 }
     );
   }
 
-  const { data, error } = await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from('contacts')
-    .update({
-      status,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .select('id')
-    .single();
+    .delete()
+    .eq('id', id);
 
-  if (error || !data) {
+  if (error) {
     return NextResponse.json(
-      { error: error?.message || 'Not found' },
-      { status: error ? 500 : 404 }
+      { success: false, error: error.message },
+      { status: 500 }
     );
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    message: 'Contact deleted successfully',
+  });
 }

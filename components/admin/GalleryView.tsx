@@ -64,7 +64,7 @@ export default function GalleryView({
     setFormCategory(item.category);
     setFormImageUrl(item.image_url);
     setFormAspectRatio(item.aspect_ratio || 'landscape');
-    setFormFeatured(!!item.featured);
+    setFormFeatured(!!item.is_featured);
     setIsModalOpen(true);
   };
 
@@ -73,12 +73,12 @@ export default function GalleryView({
     if (!formTitle.trim() || !formImageUrl.trim()) return;
 
     await onSaveItem({
-      id: editingItem?._id || editingItem?.id,
+      id: editingItem?.id,
       title: formTitle.trim(),
       category: formCategory,
       image_url: formImageUrl.trim(),
       aspect_ratio: formAspectRatio,
-      featured: formFeatured,
+      is_featured: formFeatured,
     });
 
     setIsModalOpen(false);
@@ -191,7 +191,7 @@ export default function GalleryView({
                     <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-black/80 text-white backdrop-blur-md">
                       {item.category}
                     </span>
-                    {item.featured && (
+                    {item.is_featured && (
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-amber-500 text-black flex items-center gap-0.5">
                         <Star className="w-2.5 h-2.5 fill-black" />
                         Featured

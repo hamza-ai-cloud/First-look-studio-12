@@ -6,13 +6,6 @@ export const runtime = 'nodejs';
 
 const secret = process.env.NEXTAUTH_SECRET;
 
-const BOOKING_STATUSES = [
-  'pending',
-  'confirmed',
-  'completed',
-  'cancelled',
-] as const;
-
 async function authorized(request: Request) {
   const token = await getToken({
     req: request as any,
@@ -33,30 +26,20 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const status = url.searchParams.get('status');
-  const search = url.searchParams.get('q');
+  const active = url.searchParams.get('active');
 
   let query = supabaseAdmin
-    .from('bookings')
+    .from('services')
     .select('*')
-    .order('created_at', { ascending: false })
-    .limit(500);
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
 
-  if (
-    status &&
-    BOOKING_STATUSES.includes(
-      status as (typeof BOOKING_STATUSES)[number]
-    )
-  ) {
-    query = query.eq('status', status);
+  if (active === 'true') {
+    query = query.eq('is_active', true);
   }
 
-  if (search) {
-    const term = search.replace(/[%_]/g, '\\$&');
-
-    query = query.or(
-      `name.ilike.%${term}%,email.ilike.%${term}%,service.ilike.%${term}%,package.ilike.%${term}%`
-    );
+  if (active === 'false') {
+    query = query.eq('is_active', false);
   }
 
   const { data, error } = await query;
@@ -85,67 +68,50 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const name = String(body.name || '').trim();
-    const email = String(body.email || '').trim().toLowerCase();
-    const phone = String(body.phone || '').trim();
-    const service = String(body.service || '').trim();
-    const packageName = String(body.package || '').trim();
-    const date = String(body.date || '').trim();
-    const time = String(body.time || '').trim();
-    const photographer = String(body.photographer || '').trim();
-    const notes = body.notes
-      ? String(body.notes).trim()
-      : null;
+    const title = String(body.title || '').trim();
 
-    if (!name || !email || !service || !packageName) {
+    if (!title) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            'Name, email, service and package are required',
-        },
+        { success: false, error: 'Service title is required' },
         { status: 400 }
       );
     }
 
-    const status = body.status || 'pending';
-
-    if (!BOOKING_STATUSES.includes(status)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid booking status' },
-        { status: 400 }
-      );
-    }
-
-    const totalPrice =
-      body.total_price === '' ||
-      body.total_price === null ||
-      body.total_price === undefined
-        ? 0
-        : Number(body.total_price);
-
-    if (!Number.isFinite(totalPrice) || totalPrice < 0) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid total price' },
-        { status: 400 }
-      );
-    }
+    const payload = {
+      name: body.name ? String(body.name).trim() : null,
+      title,
+      slug: body.slug ? String(body.slug).trim() : null,
+      description: body.description
+        ? String(body.description).trim()
+        : null,
+      category: body.category
+        ? String(body.category).trim()
+        : null,
+      price:
+        body.price === null ||
+        body.price === undefined ||
+        body.price === ''
+          ? null
+          : Number(body.price),
+      image_url: body.image_url
+        ? String(body.image_url).trim()
+        : null,
+      features: Array.isArray(body.features)
+        ? body.features
+        : [],
+      is_active:
+        typeof body.is_active === 'boolean'
+          ? body.is_active
+          : true,
+      sort_order:
+        Number.isFinite(Number(body.sort_order))
+          ? Number(body.sort_order)
+          : 0,
+    };
 
     const { data, error } = await supabaseAdmin
-      .from('bookings')
-      .insert({
-        name,
-        email,
-        phone,
-        service,
-        package: packageName,
-        date,
-        time,
-        photographer,
-        notes,
-        status,
-        total_price: totalPrice,
-      })
+      .from('services')
+      .insert(payload)
       .select('*')
       .single();
 
@@ -191,26 +157,25 @@ export async function PUT(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Booking id is required' },
+        { success: false, error: 'Service id is required' },
         { status: 400 }
       );
     }
 
+    const updates: Record<string, unknown> = {};
+
     const allowedFields = [
       'name',
-      'email',
-      'phone',
-      'service',
-      'package',
-      'date',
-      'time',
-      'photographer',
-      'notes',
-      'status',
-      'total_price',
+      'title',
+      'slug',
+      'description',
+      'category',
+      'price',
+      'image_url',
+      'features',
+      'is_active',
+      'sort_order',
     ];
-
-    const updates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -218,42 +183,29 @@ export async function PUT(request: Request) {
       }
     }
 
-    if (
-      updates.status !== undefined &&
-      !BOOKING_STATUSES.includes(
-        String(updates.status) as (typeof BOOKING_STATUSES)[number]
-      )
-    ) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid booking status' },
-        { status: 400 }
-      );
-    }
+    if (typeof updates.title === 'string') {
+      updates.title = updates.title.trim();
 
-    if (updates.total_price !== undefined) {
-      if (
-        updates.total_price === '' ||
-        updates.total_price === null
-      ) {
-        updates.total_price = 0;
-      } else {
-        const price = Number(updates.total_price);
-
-        if (!Number.isFinite(price) || price < 0) {
-          return NextResponse.json(
-            { success: false, error: 'Invalid total price' },
-            { status: 400 }
-          );
-        }
-
-        updates.total_price = price;
+      if (!updates.title) {
+        return NextResponse.json(
+          { success: false, error: 'Service title is required' },
+          { status: 400 }
+        );
       }
     }
 
-    updates.updated_at = new Date().toISOString();
+    if (updates.price === '') {
+      updates.price = null;
+    } else if (updates.price !== undefined && updates.price !== null) {
+      updates.price = Number(updates.price);
+    }
+
+    if (updates.updated_at === undefined) {
+      updates.updated_at = new Date().toISOString();
+    }
 
     const { data, error } = await supabaseAdmin
-      .from('bookings')
+      .from('services')
       .update(updates)
       .eq('id', id)
       .select('*')
@@ -263,7 +215,7 @@ export async function PUT(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: error?.message || 'Booking not found',
+          error: error?.message || 'Service not found',
         },
         { status: error ? 500 : 404 }
       );
@@ -300,13 +252,13 @@ export async function DELETE(request: Request) {
 
   if (!id) {
     return NextResponse.json(
-      { success: false, error: 'Booking id is required' },
+      { success: false, error: 'Service id is required' },
       { status: 400 }
     );
   }
 
   const { error } = await supabaseAdmin
-    .from('bookings')
+    .from('services')
     .delete()
     .eq('id', id);
 
@@ -319,6 +271,6 @@ export async function DELETE(request: Request) {
 
   return NextResponse.json({
     success: true,
-    message: 'Booking deleted successfully',
+    message: 'Service deleted successfully',
   });
 }

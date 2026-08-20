@@ -1,56 +1,122 @@
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
 import BookingsList from '@/components/admin/BookingsView';
+import type { BookingRecord, BookingStatus } from '@/lib/types';
 
-export const dynamic = 'force-dynamic';
+export default function BookingsPage() {
+  const [bookings, setBookings] = useState<BookingRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function BookingsPage() {
-  const { data: bookings, error } = await supabaseAdmin
-    .from('bookings')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(100);
+  const loadBookings = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/bookings', {
+        cache: 'no-store',
+      });
 
-  if (error) {
-    throw new Error(error.message);
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error || 'Failed to load bookings'
+        );
+      }
+
+      setBookings(result.data || []);
+    } catch (error) {
+      console.error('Load bookings error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadBookings();
+  }, [loadBookings]);
+
+  const onUpdateStatus = async (
+    id: string,
+    status: BookingStatus
+  ) => {
+    if (!id) return;
+
+    const response = await fetch('/api/admin/bookings', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+        status,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error || 'Failed to update booking'
+      );
+    }
+
+    await loadBookings();
+  };
+
+  const onUpdateNotes = async () => {
+    // Notes update is not currently supported by the admin API.
+  };
+
+  const onDeleteBooking = async (id: string) => {
+    if (!id) return;
+
+    if (
+      !window.confirm(
+        'Delete this booking permanently?'
+      )
+    ) {
+      return;
+    }
+
+    const response = await fetch(
+      `/api/admin/bookings?id=${encodeURIComponent(id)}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error || 'Failed to delete booking'
+      );
+    }
+
+    await loadBookings();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-sm text-[#8b949e]">
+          Loading bookings...
+        </div>
+      </div>
+    );
   }
-
-  const initial = (bookings || []).map((b: any) => ({
-    id: b.id,
-    name: b.name,
-    email: b.email,
-    phone: b.phone,
-    service: b.service,
-    date: b.date,
-    time: b.time,
-    notes: b.notes,
-    status: b.status,
-    createdAt: b.created_at,
-  }));
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Bookings</h1>
+      <h1 className="mb-4 text-2xl font-bold text-white">
+        Bookings
+      </h1>
+
       <BookingsList
-        bookings={initial.map((b: any) => ({
-          ...b,
-          _id: b.id,
-          client_name: b.name,
-          client_email: b.email,
-          service_package: b.service,
-          event_date: b.date,
-          total_price: 0,
-        }))}
-        onUpdateStatus={async (id, status) => {
-          await fetch('/api/admin/bookings', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, status }),
-          });
-        }}
-        onUpdateNotes={async () => {}}
-        onDeleteBooking={async () => {}}
+        bookings={bookings}
+        onUpdateStatus={onUpdateStatus}
+        onUpdateNotes={onUpdateNotes}
+        onDeleteBooking={onDeleteBooking}
       />
     </div>
   );
-
 }

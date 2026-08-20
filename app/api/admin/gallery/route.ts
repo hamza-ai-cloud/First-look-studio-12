@@ -6,11 +6,19 @@ export const runtime = 'nodejs';
 
 const secret = process.env.NEXTAUTH_SECRET;
 
-const BOOKING_STATUSES = [
-  'pending',
-  'confirmed',
-  'completed',
-  'cancelled',
+const CATEGORIES = [
+  'Weddings',
+  'Portraits',
+  'Fashion',
+  'Commercial',
+  'Events',
+  'Cinematic',
+] as const;
+
+const ASPECT_RATIOS = [
+  'portrait',
+  'landscape',
+  'square',
 ] as const;
 
 async function authorized(request: Request) {
@@ -33,29 +41,30 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const status = url.searchParams.get('status');
+  const category = url.searchParams.get('category');
   const search = url.searchParams.get('q');
 
   let query = supabaseAdmin
-    .from('bookings')
+    .from('gallery')
     .select('*')
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
-    .limit(500);
+    .limit(1000);
 
   if (
-    status &&
-    BOOKING_STATUSES.includes(
-      status as (typeof BOOKING_STATUSES)[number]
+    category &&
+    CATEGORIES.includes(
+      category as (typeof CATEGORIES)[number]
     )
   ) {
-    query = query.eq('status', status);
+    query = query.eq('category', category);
   }
 
   if (search) {
     const term = search.replace(/[%_]/g, '\\$&');
 
     query = query.or(
-      `name.ilike.%${term}%,email.ilike.%${term}%,service.ilike.%${term}%,package.ilike.%${term}%`
+      `title.ilike.%${term}%,category.ilike.%${term}%`
     );
   }
 
@@ -85,66 +94,64 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const name = String(body.name || '').trim();
-    const email = String(body.email || '').trim().toLowerCase();
-    const phone = String(body.phone || '').trim();
-    const service = String(body.service || '').trim();
-    const packageName = String(body.package || '').trim();
-    const date = String(body.date || '').trim();
-    const time = String(body.time || '').trim();
-    const photographer = String(body.photographer || '').trim();
-    const notes = body.notes
-      ? String(body.notes).trim()
-      : null;
+    const title = String(body.title || '').trim();
+    const imageUrl = String(body.image_url || '').trim();
+    const category = String(body.category || '').trim();
+    const aspectRatio = String(
+      body.aspect_ratio || 'landscape'
+    ).trim();
 
-    if (!name || !email || !service || !packageName) {
+    if (!title || !imageUrl) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            'Name, email, service and package are required',
+          error: 'Title and image URL are required',
         },
         { status: 400 }
       );
     }
 
-    const status = body.status || 'pending';
-
-    if (!BOOKING_STATUSES.includes(status)) {
+    if (
+      !CATEGORIES.includes(
+        category as (typeof CATEGORIES)[number]
+      )
+    ) {
       return NextResponse.json(
-        { success: false, error: 'Invalid booking status' },
+        { success: false, error: 'Invalid gallery category' },
         { status: 400 }
       );
     }
 
-    const totalPrice =
-      body.total_price === '' ||
-      body.total_price === null ||
-      body.total_price === undefined
-        ? 0
-        : Number(body.total_price);
-
-    if (!Number.isFinite(totalPrice) || totalPrice < 0) {
+    if (
+      !ASPECT_RATIOS.includes(
+        aspectRatio as (typeof ASPECT_RATIOS)[number]
+      )
+    ) {
       return NextResponse.json(
-        { success: false, error: 'Invalid total price' },
+        { success: false, error: 'Invalid aspect ratio' },
         { status: 400 }
       );
     }
 
     const { data, error } = await supabaseAdmin
-      .from('bookings')
+      .from('gallery')
       .insert({
-        name,
-        email,
-        phone,
-        service,
-        package: packageName,
-        date,
-        time,
-        photographer,
-        notes,
-        status,
-        total_price: totalPrice,
+        title,
+        image_url: imageUrl,
+        category,
+        aspect_ratio: aspectRatio,
+        is_featured: Boolean(body.is_featured),
+        is_active:
+          body.is_active === undefined
+            ? true
+            : Boolean(body.is_active),
+        description: body.description
+          ? String(body.description).trim()
+          : null,
+        sort_order:
+          Number.isFinite(Number(body.sort_order))
+            ? Number(body.sort_order)
+            : 0,
       })
       .select('*')
       .single();
@@ -191,26 +198,23 @@ export async function PUT(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Booking id is required' },
+        { success: false, error: 'Gallery item id is required' },
         { status: 400 }
       );
     }
 
-    const allowedFields = [
-      'name',
-      'email',
-      'phone',
-      'service',
-      'package',
-      'date',
-      'time',
-      'photographer',
-      'notes',
-      'status',
-      'total_price',
-    ];
-
     const updates: Record<string, unknown> = {};
+
+    const allowedFields = [
+      'title',
+      'image_url',
+      'category',
+      'aspect_ratio',
+      'description',
+      'is_featured',
+      'is_active',
+      'sort_order',
+    ];
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -218,42 +222,36 @@ export async function PUT(request: Request) {
       }
     }
 
-    if (
-      updates.status !== undefined &&
-      !BOOKING_STATUSES.includes(
-        String(updates.status) as (typeof BOOKING_STATUSES)[number]
-      )
-    ) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid booking status' },
-        { status: 400 }
-      );
+    if (updates.category !== undefined) {
+      if (
+        !CATEGORIES.includes(
+          String(updates.category) as (typeof CATEGORIES)[number]
+        )
+      ) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid gallery category' },
+          { status: 400 }
+        );
+      }
     }
 
-    if (updates.total_price !== undefined) {
+    if (updates.aspect_ratio !== undefined) {
       if (
-        updates.total_price === '' ||
-        updates.total_price === null
+        !ASPECT_RATIOS.includes(
+          String(updates.aspect_ratio) as (typeof ASPECT_RATIOS)[number]
+        )
       ) {
-        updates.total_price = 0;
-      } else {
-        const price = Number(updates.total_price);
-
-        if (!Number.isFinite(price) || price < 0) {
-          return NextResponse.json(
-            { success: false, error: 'Invalid total price' },
-            { status: 400 }
-          );
-        }
-
-        updates.total_price = price;
+        return NextResponse.json(
+          { success: false, error: 'Invalid aspect ratio' },
+          { status: 400 }
+        );
       }
     }
 
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabaseAdmin
-      .from('bookings')
+      .from('gallery')
       .update(updates)
       .eq('id', id)
       .select('*')
@@ -263,7 +261,7 @@ export async function PUT(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: error?.message || 'Booking not found',
+          error: error?.message || 'Gallery item not found',
         },
         { status: error ? 500 : 404 }
       );
@@ -295,18 +293,17 @@ export async function DELETE(request: Request) {
     );
   }
 
-  const url = new URL(request.url);
-  const id = url.searchParams.get('id');
+  const id = new URL(request.url).searchParams.get('id');
 
   if (!id) {
     return NextResponse.json(
-      { success: false, error: 'Booking id is required' },
+      { success: false, error: 'Gallery item id is required' },
       { status: 400 }
     );
   }
 
   const { error } = await supabaseAdmin
-    .from('bookings')
+    .from('gallery')
     .delete()
     .eq('id', id);
 
@@ -319,6 +316,6 @@ export async function DELETE(request: Request) {
 
   return NextResponse.json({
     success: true,
-    message: 'Booking deleted successfully',
+    message: 'Gallery item deleted successfully',
   });
 }

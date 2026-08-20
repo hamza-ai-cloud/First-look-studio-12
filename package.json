@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
-    "@types/three": "^0.169.0"
+    "@types/three": "^0.169.0",
+    "supabase": "^2.115.0"
   }
 }

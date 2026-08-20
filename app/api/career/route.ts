@@ -1,62 +1,133 @@
 import { NextResponse } from 'next/server';
+
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { isValidEmail, normalizeText } from '@/lib/validators';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+const MAX_LENGTHS = {
+  name: 120,
+  email: 254,
+  position: 120,
+  portfolio: 500,
+  message: 5000,
+} as const;
+
+function limit(value: string, max: number) {
+  return value.slice(0, max);
+}
+
+function errorResponse(message: string, status = 400) {
+  return NextResponse.json(
+    {
+      success: false,
+      message,
+    },
+    { status }
+  );
+}
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const contentType = request.headers.get('content-type') || '';
 
-    const name = normalizeText(body.name);
-    const email = normalizeText(body.email).toLowerCase();
-    const position = normalizeText(body.position);
-    const portfolio = normalizeText(body.portfolio);
-    const message = normalizeText(body.message);
+    if (!contentType.includes('application/json')) {
+      return errorResponse('Invalid request format.', 415);
+    }
+
+    const body = await request.json().catch(() => null);
+
+    if (!body || typeof body !== 'object') {
+      return errorResponse('Invalid career application.');
+    }
+
+    const payload = body as Record<string, unknown>;
+
+    const name = limit(
+      normalizeText(payload.name),
+      MAX_LENGTHS.name
+    );
+
+    const email = limit(
+      normalizeText(payload.email).toLowerCase(),
+      MAX_LENGTHS.email
+    );
+
+    const position = limit(
+      normalizeText(payload.position),
+      MAX_LENGTHS.position
+    );
+
+    const portfolio = limit(
+      normalizeText(payload.portfolio),
+      MAX_LENGTHS.portfolio
+    );
+
+    const message = limit(
+      normalizeText(payload.message),
+      MAX_LENGTHS.message
+    );
 
     if (name.length < 2) {
-      return NextResponse.json({ success: false, message: 'Please enter your full name.' }, { status: 400 });
+      return errorResponse('Please enter your full name.');
     }
 
     if (!isValidEmail(email)) {
-      return NextResponse.json({ success: false, message: 'Please enter a valid email address.' }, { status: 400 });
+      return errorResponse('Please enter a valid email address.');
     }
 
     if (!position) {
-      return NextResponse.json({ success: false, message: 'Please select the position you are applying for.' }, { status: 400 });
+      return errorResponse(
+        'Please select the position you are applying for.'
+      );
     }
 
     if (message.length < 15) {
-      return NextResponse.json({ success: false, message: 'Please provide a brief summary of your experience.' }, { status: 400 });
+      return errorResponse(
+        'Please provide a brief summary of your experience.'
+      );
     }
 
-    const { error } = await supabaseAdmin
-  .from('careers')
-  .insert({
-    name,
-    email,
-    position,
-    portfolio: portfolio || null,
-    message,
-    status: 'new',
-  });
+    const { data, error } = await supabaseAdmin
+      .from('careers')
+      .insert({
+        name,
+        email,
+        position,
+        portfolio: portfolio || null,
+        message,
+        status: 'new',
+      })
+      .select('id')
+      .single();
 
-if (error) {
-  throw error;
-}
-    return NextResponse.json({
-      success: true,
-      message: 'Application submitted successfully. Our team will review it shortly.',
-    });
-  } catch (error) {
-    console.error('Career submission error:', error);
+    if (error) {
+      console.error('Career database error:', error);
+
+      return errorResponse(
+        'Unable to submit your application right now. Please try again later.',
+        500
+      );
+    }
 
     return NextResponse.json(
       {
-        success: false,
-        message: 'Unable to submit your application right now. Please try again later.',
+        success: true,
+        message:
+          'Application submitted successfully. Our team will review it shortly.',
+        data: {
+          id: data.id,
+        },
       },
-      { status: 500 },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Career submission exception:', error);
+
+    return errorResponse(
+      'Unable to submit your application right now. Please try again later.',
+      500
     );
   }
 }

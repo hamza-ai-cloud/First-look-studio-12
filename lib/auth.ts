@@ -1,18 +1,40 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth, { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { supabaseAdmin } from './supabaseAdmin';
 import bcrypt from 'bcryptjs';
 
+import { supabaseAdmin } from './supabaseAdmin';
+
+type AdminRole = 'admin' | 'super_admin';
+
+interface AdminUser {
+  id: string;
+  email: string;
+  password_hash: string;
+  role: string | null;
+}
+
+function isAdminRole(role: string | null | undefined): role is AdminRole {
+  return role === 'admin' || role === 'super_admin';
+}
+
 export const authOptions: NextAuthOptions = {
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+  },
 
   providers: [
     CredentialsProvider({
       name: 'Credentials',
 
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+        email: {
+          label: 'Email',
+          type: 'email',
+        },
+        password: {
+          label: 'Password',
+          type: 'password',
+        },
       },
 
       async authorize(credentials) {
@@ -21,39 +43,47 @@ export const authOptions: NextAuthOptions = {
         }
 
         const email = credentials.email.toLowerCase().trim();
+        const password = credentials.password;
 
-        const { data: user, error } = await supabaseAdmin
+        if (!email || !password) {
+          return null;
+        }
+
+        const { data, error } = await supabaseAdmin
           .from('admins')
-          .select('*')
+          .select('id, email, password_hash, role')
           .eq('email', email)
           .maybeSingle();
 
-        if (error || !user) {
+        if (error || !data) {
           return null;
         }
 
-        const passwordHash =
-          user.password_hash || user.passwordHash;
+        const admin = data as AdminUser;
 
-        if (!passwordHash) {
+        if (!admin.password_hash) {
           return null;
         }
 
-        const ok = await bcrypt.compare(
-          credentials.password,
-          passwordHash
+        if (!isAdminRole(admin.role)) {
+          return null;
+        }
+
+        const passwordValid = await bcrypt.compare(
+          password,
+          admin.password_hash
         );
 
-        if (!ok) {
+        if (!passwordValid) {
           return null;
         }
 
         return {
-          id: user.id,
-          email: user.email,
+          id: admin.id,
+          email: admin.email,
           name: 'Admin',
-          role: user.role || 'admin',
-        } as any;
+          role: admin.role,
+        };
       },
     }),
   ],
@@ -61,7 +91,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role || 'admin';
+        token.id = user.id;
+        token.email = user.email;
+        token.role = (user as { role?: string }).role || 'admin';
       }
 
       return token;
@@ -69,7 +101,17 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role;
+        session.user.email = token.email || session.user.email;
+
+        (session.user as typeof session.user & {
+          id?: string;
+          role?: string;
+        }).id = token.id as string | undefined;
+
+        (session.user as typeof session.user & {
+          id?: string;
+          role?: string;
+        }).role = token.role as string | undefined;
       }
 
       return session;
@@ -77,6 +119,10 @@ export const authOptions: NextAuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
+
+  pages: {
+    signIn: '/admin/signin',
+  },
 };
 
 export default NextAuth(authOptions);
