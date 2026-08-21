@@ -1,59 +1,101 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from "react";
 import {
   Image as ImageIcon,
   Plus,
   Search,
-  Filter,
   Trash2,
   Edit2,
   Star,
-  ExternalLink,
   X,
-} from 'lucide-react';
-import type { GalleryItemRecord } from '@/lib/types';
+  Upload,
+  Link as LinkIcon,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import type { GalleryItemRecord } from "@/lib/types";
 
 interface GalleryViewProps {
   gallery: GalleryItemRecord[];
-  onSaveItem: (item: Partial<GalleryItemRecord> & { title: string; image_url: string }) => Promise<void> | void;
+  onSaveItem: (
+    item: Partial<GalleryItemRecord> & {
+      title: string;
+      image_url: string;
+    }
+  ) => Promise<void> | void;
   onDeleteItem: (id: string) => Promise<void> | void;
 }
 
-const GALLERY_CATEGORIES = ['Weddings', 'Portraits', 'Fashion', 'Commercial', 'Events', 'Cinematic'] as const;
+const GALLERY_CATEGORIES = [
+  "Weddings",
+  "Portraits",
+  "Fashion",
+  "Commercial",
+  "Events",
+  "Cinematic",
+] as const;
+
+type Toast = {
+  type: "success" | "error";
+  title: string;
+  message: string;
+};
 
 export default function GalleryView({
   gallery = [],
   onSaveItem,
   onDeleteItem,
 }: GalleryViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [editingItem, setEditingItem] = useState<Partial<GalleryItemRecord> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [editingItem, setEditingItem] =
+    useState<Partial<GalleryItemRecord> | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Form
-  const [formTitle, setFormTitle] = useState('');
-  const [formCategory, setFormCategory] = useState<typeof GALLERY_CATEGORIES[number]>('Weddings');
-  const [formImageUrl, setFormImageUrl] = useState('');
-  const [formAspectRatio, setFormAspectRatio] = useState<'portrait' | 'landscape' | 'square'>('landscape');
+  const [formTitle, setFormTitle] = useState("");
+  const [formCategory, setFormCategory] =
+    useState<(typeof GALLERY_CATEGORIES)[number]>("Weddings");
+  const [formImageUrl, setFormImageUrl] = useState("");
+  const [formAspectRatio, setFormAspectRatio] =
+    useState<"portrait" | "landscape" | "square">("landscape");
   const [formFeatured, setFormFeatured] = useState(false);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
 
   const filteredGallery = gallery.filter((item) => {
     const term = searchTerm.toLowerCase();
+
     const matchesSearch =
       (item.title && item.title.toLowerCase().includes(term)) ||
       (item.category && item.category.toLowerCase().includes(term));
-    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
+
+    const matchesCategory =
+      categoryFilter === "all" || item.category === categoryFilter;
+
     return matchesSearch && matchesCategory;
   });
 
+  const showToast = (nextToast: Toast) => {
+    setToast(nextToast);
+
+    window.setTimeout(() => {
+      setToast(null);
+    }, 4500);
+  };
+
   const handleOpenCreate = () => {
     setEditingItem(null);
-    setFormTitle('');
-    setFormCategory('Weddings');
-    setFormImageUrl('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800');
-    setFormAspectRatio('landscape');
+    setFormTitle("");
+    setFormCategory("Weddings");
+    setFormImageUrl("");
+    setFormAspectRatio("landscape");
     setFormFeatured(false);
     setIsModalOpen(true);
   };
@@ -61,74 +103,250 @@ export default function GalleryView({
   const handleOpenEdit = (item: GalleryItemRecord) => {
     setEditingItem(item);
     setFormTitle(item.title);
-    setFormCategory(item.category);
+    setFormCategory(
+      GALLERY_CATEGORIES.includes(
+        item.category as (typeof GALLERY_CATEGORIES)[number]
+      )
+        ? (item.category as (typeof GALLERY_CATEGORIES)[number])
+        : "Weddings"
+    );
     setFormImageUrl(item.image_url);
-    setFormAspectRatio(item.aspect_ratio || 'landscape');
+    setFormAspectRatio(item.aspect_ratio || "landscape");
     setFormFeatured(!!item.is_featured);
     setIsModalOpen(true);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formTitle.trim() || !formImageUrl.trim()) return;
+  const uploadFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      showToast({
+        type: "error",
+        title: "Invalid File",
+        message: "Please choose an image file.",
+      });
+      return;
+    }
 
-    await onSaveItem({
-      id: editingItem?.id,
-      title: formTitle.trim(),
-      category: formCategory,
-      image_url: formImageUrl.trim(),
-      aspect_ratio: formAspectRatio,
-      is_featured: formFeatured,
-    });
+    if (file.size > 10 * 1024 * 1024) {
+      showToast({
+        type: "error",
+        title: "Image Too Large",
+        message: "Please choose an image smaller than 10 MB.",
+      });
+      return;
+    }
 
-    setIsModalOpen(false);
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/gallery/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Image upload failed.");
+      }
+
+      setFormImageUrl(result.data.image_url);
+
+      if (!formTitle.trim()) {
+        const cleanName = file.name
+          .replace(/\.[^/.]+$/, "")
+          .replace(/[-_]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        if (cleanName) {
+          setFormTitle(
+            cleanName.charAt(0).toUpperCase() + cleanName.slice(1)
+          );
+        }
+      }
+
+      showToast({
+        type: "success",
+        title: "Image Uploaded",
+        message:
+          "Your image has been uploaded successfully. You can now save it to your gallery.",
+      });
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "Upload Failed",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to upload the image.",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      void uploadFile(file);
+    }
+
+    event.target.value = "";
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+
+    if (file) {
+      void uploadFile(file);
+    }
+  };
+
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!formTitle.trim()) {
+      showToast({
+        type: "error",
+        title: "Title Required",
+        message: "Please enter a title for this artwork.",
+      });
+      return;
+    }
+
+    if (!formImageUrl.trim()) {
+      showToast({
+        type: "error",
+        title: "Image Required",
+        message: "Please upload an image or enter an image URL.",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      await onSaveItem({
+        id: editingItem?.id,
+        title: formTitle.trim(),
+        category: formCategory,
+        image_url: formImageUrl.trim(),
+        aspect_ratio: formAspectRatio,
+        is_featured: formFeatured,
+      });
+
+      setIsModalOpen(false);
+
+      showToast({
+        type: "success",
+        title: editingItem ? "Artwork Updated Successfully" : "Image Added Successfully",
+        message: editingItem
+          ? "Your gallery artwork has been updated. Check your website to see the changes."
+          : "Your image has been added to your website gallery. Check your website to see it live.",
+      });
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "Could Not Save Artwork",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {toast && (
+        <div className="fixed right-4 top-4 z-[100] w-[min(420px,calc(100vw-2rem))]">
+          <div
+            className={`rounded-2xl border p-4 shadow-2xl backdrop-blur-xl ${
+              toast.type === "success"
+                ? "border-emerald-500/30 bg-[#071b12]/95"
+                : "border-rose-500/30 bg-[#21090d]/95"
+            }`}
+          >
+            <div className="flex gap-3">
+              {toast.type === "success" ? (
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+              ) : (
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-400" />
+              )}
+
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-white">{toast.title}</div>
+                <div className="mt-1 text-xs leading-5 text-[#b7c0ca]">
+                  {toast.message}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                className="text-[#8b949e] hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-purple-400" />
+          <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+            <ImageIcon className="h-5 w-5 text-purple-400" />
             Studio Gallery & Artwork Portfolio
           </h2>
-          <p className="text-xs text-[#8b949e] mt-0.5">
-            Organize photography and video stills, categorize by theme, and manage featured homepage showcases.
+
+          <p className="mt-0.5 text-xs text-[#8b949e]">
+            Organize photography and video stills, categorize by theme, and
+            manage featured homepage showcases.
           </p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-purple-600/20 cursor-pointer"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-purple-600/20 transition-all hover:bg-purple-500"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           Add Portfolio Artwork
         </button>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-4 flex flex-col md:flex-row gap-3 items-center justify-between">
-        {/* Category Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+      <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-[#30363d] bg-[#161b22] p-4 md:flex-row">
+        <div className="flex w-full items-center gap-1.5 overflow-x-auto pb-2 md:w-auto md:pb-0">
           <button
-            onClick={() => setCategoryFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-              categoryFilter === 'all'
-                ? 'bg-purple-500 text-black shadow-md shadow-purple-500/20'
-                : 'bg-[#21262d] text-[#8b949e] hover:text-white hover:bg-[#30363d]'
+            onClick={() => setCategoryFilter("all")}
+            className={`whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+              categoryFilter === "all"
+                ? "bg-purple-500 text-black shadow-md shadow-purple-500/20"
+                : "bg-[#21262d] text-[#8b949e] hover:bg-[#30363d] hover:text-white"
             }`}
           >
             All ({gallery.length})
           </button>
+
           {GALLERY_CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              className={`whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${
                 categoryFilter === cat
-                  ? 'bg-purple-500 text-black shadow-md shadow-purple-500/20'
-                  : 'bg-[#21262d] text-[#8b949e] hover:text-white hover:bg-[#30363d]'
+                  ? "bg-purple-500 text-black shadow-md shadow-purple-500/20"
+                  : "bg-[#21262d] text-[#8b949e] hover:bg-[#30363d] hover:text-white"
               }`}
             >
               {cat} ({gallery.filter((g) => g.category === cat).length})
@@ -136,94 +354,103 @@ export default function GalleryView({
           ))}
         </div>
 
-        {/* Search */}
         <div className="relative w-full md:w-72">
-          <Search className="w-4 h-4 text-[#8b949e] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b949e]" />
           <input
             type="text"
             placeholder="Search artworks..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-[#0b0e14] border border-[#30363d] rounded-xl text-xs text-white placeholder-[#484f58] focus:outline-none focus:border-purple-500 transition-colors"
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className="w-full rounded-xl border border-[#30363d] bg-[#0b0e14] py-2 pl-9 pr-4 text-xs text-white placeholder-[#484f58] focus:border-purple-500 focus:outline-none"
           />
+
           {searchTerm && (
             <button
-              onClick={() => setSearchTerm('')}
+              onClick={() => setSearchTerm("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b949e] hover:text-white"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Gallery Grid */}
       {filteredGallery.length === 0 ? (
-        <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-12 text-center">
-          <ImageIcon className="w-12 h-12 text-[#484f58] mx-auto mb-3" />
-          <h3 className="text-sm font-semibold text-white">No Artworks Found</h3>
-          <p className="text-xs text-[#8b949e] mt-1 max-w-sm mx-auto">
-            {searchTerm || categoryFilter !== 'all'
-              ? 'No artwork records match your active category search.'
-              : 'Add your first photography piece to feature it on the studio portfolio.'}
+        <div className="rounded-2xl border border-[#30363d] bg-[#161b22] p-12 text-center">
+          <ImageIcon className="mx-auto mb-3 h-12 w-12 text-[#484f58]" />
+          <h3 className="text-sm font-semibold text-white">
+            No Artworks Found
+          </h3>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-[#8b949e]">
+            {searchTerm || categoryFilter !== "all"
+              ? "No artwork records match your active category search."
+              : "Add your first photography piece to feature it on the studio portfolio."}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {filteredGallery.map((item) => {
-            const itemId = item._id || item.id || '';
+            const itemId = item._id || item.id || "";
+
             return (
               <div
                 key={itemId}
-                className="bg-[#161b22] border border-[#30363d] rounded-2xl overflow-hidden group hover:border-[#484f58] transition-all flex flex-col justify-between"
+                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-[#30363d] bg-[#161b22] transition-all hover:border-[#484f58]"
               >
-                <div className="relative aspect-4/3 bg-[#0d1117] overflow-hidden">
+                <div className="relative aspect-[4/3] overflow-hidden bg-[#0d1117]">
                   <img
                     src={item.image_url}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800';
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(event) => {
+                      event.currentTarget.src =
+                        "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800";
                     }}
                   />
-                  <div className="absolute top-2 left-2 flex items-center gap-1">
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-black/80 text-white backdrop-blur-md">
+
+                  <div className="absolute left-2 top-2 flex items-center gap-1">
+                    <span className="rounded-full bg-black/80 px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-white backdrop-blur-md">
                       {item.category}
                     </span>
+
                     {item.is_featured && (
-                      <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-amber-500 text-black flex items-center gap-0.5">
-                        <Star className="w-2.5 h-2.5 fill-black" />
+                      <span className="flex items-center gap-0.5 rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-black">
+                        <Star className="h-2.5 w-2.5 fill-black" />
                         Featured
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="p-3.5 flex items-center justify-between">
+                <div className="flex items-center justify-between p-3.5">
                   <div className="overflow-hidden pr-2">
-                    <h4 className="text-xs font-bold text-white truncate" title={item.title}>
+                    <h4
+                      className="truncate text-xs font-bold text-white"
+                      title={item.title}
+                    >
                       {item.title}
                     </h4>
-                    <span className="text-[10px] text-[#8b949e] font-mono block">
-                      Ratio: {item.aspect_ratio || 'landscape'}
+
+                    <span className="block font-mono text-[10px] text-[#8b949e]">
+                      Ratio: {item.aspect_ratio || "landscape"}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex shrink-0 items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(item)}
                       title="Edit Artwork"
-                      className="p-1.5 bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] hover:text-white rounded-lg transition-colors cursor-pointer"
+                      className="cursor-pointer rounded-lg bg-[#21262d] p-1.5 text-[#c9d1d9] transition-colors hover:bg-[#30363d] hover:text-white"
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
+                      <Edit2 className="h-3.5 w-3.5" />
                     </button>
+
                     <button
                       onClick={() => onDeleteItem(itemId)}
                       title="Delete Artwork"
-                      className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors cursor-pointer"
+                      className="cursor-pointer rounded-lg bg-rose-500/10 p-1.5 text-rose-400 transition-colors hover:bg-rose-500/20"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
@@ -233,54 +460,77 @@ export default function GalleryView({
         </div>
       )}
 
-      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-          <div className="bg-[#161b22] border border-[#30363d] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
-            <div className="p-5 border-b border-[#30363d] flex items-center justify-between bg-[#0d1117]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm">
+          <div className="my-8 max-h-[calc(100vh-4rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-[#30363d] bg-[#161b22] shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#30363d] bg-[#0d1117] p-5">
               <h3 className="text-sm font-bold text-white">
-                {editingItem ? `Edit Artwork: ${editingItem.title}` : 'Add Portfolio Artwork'}
+                {editingItem
+                  ? `Edit Artwork: ${editingItem.title}`
+                  : "Add Portfolio Artwork"}
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-[#8b949e] hover:text-white">
-                <X className="w-4 h-4" />
+
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-[#8b949e] hover:text-white"
+              >
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-6 space-y-4 text-xs text-[#c9d1d9]">
+            <form onSubmit={handleSave} className="space-y-4 p-6 text-xs text-[#c9d1d9]">
               <div className="space-y-1.5">
-                <label className="font-semibold text-white">Artwork Title *</label>
+                <label className="font-semibold text-white">
+                  Artwork Title *
+                </label>
+
                 <input
                   type="text"
                   required
                   value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="e.g. Tuscany Sunset Wedding"
-                  className="w-full p-2.5 bg-[#0b0e14] border border-[#30363d] rounded-xl text-white focus:outline-none focus:border-purple-500"
+                  onChange={(event) => setFormTitle(event.target.value)}
+                  placeholder="e.g. Wedding Ceremony"
+                  className="w-full rounded-xl border border-[#30363d] bg-[#0b0e14] p-2.5 text-white focus:border-purple-500 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="font-semibold text-white">Category</label>
+
                   <select
                     value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value as any)}
-                    className="w-full p-2.5 bg-[#0b0e14] border border-[#30363d] rounded-xl text-white focus:outline-none focus:border-purple-500"
+                    onChange={(event) =>
+                      setFormCategory(
+                        event.target.value as (typeof GALLERY_CATEGORIES)[number]
+                      )
+                    }
+                    className="w-full rounded-xl border border-[#30363d] bg-[#0b0e14] p-2.5 text-white focus:border-purple-500 focus:outline-none"
                   >
-                    {GALLERY_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
+                    {GALLERY_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-white">Aspect Ratio</label>
+                  <label className="font-semibold text-white">
+                    Aspect Ratio
+                  </label>
+
                   <select
                     value={formAspectRatio}
-                    onChange={(e) => setFormAspectRatio(e.target.value as any)}
-                    className="w-full p-2.5 bg-[#0b0e14] border border-[#30363d] rounded-xl text-white focus:outline-none focus:border-purple-500"
+                    onChange={(event) =>
+                      setFormAspectRatio(
+                        event.target.value as
+                          | "portrait"
+                          | "landscape"
+                          | "square"
+                      )
+                    }
+                    className="w-full rounded-xl border border-[#30363d] bg-[#0b0e14] p-2.5 text-white focus:border-purple-500 focus:outline-none"
                   >
                     <option value="landscape">Landscape (16:9)</option>
                     <option value="portrait">Portrait (3:4)</option>
@@ -289,49 +539,161 @@ export default function GalleryView({
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-white">High-Resolution Image URL *</label>
+              <div className="space-y-2">
+                <label className="font-semibold text-white">
+                  Upload Image
+                </label>
+
                 <input
-                  type="url"
-                  required
-                  value={formImageUrl}
-                  onChange={(e) => setFormImageUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full p-2.5 bg-[#0b0e14] border border-[#30363d] rounded-xl text-white focus:outline-none focus:border-purple-500"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
-                {formImageUrl && (
-                  <div className="mt-2 aspect-video rounded-xl overflow-hidden border border-[#30363d] bg-black">
-                    <img src={formImageUrl} alt="Preview" className="w-full h-full object-cover" />
+
+                <div
+                  onDragEnter={(event) => {
+                    event.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={(event) => {
+                    event.preventDefault();
+                    setIsDragging(false);
+                  }}
+                  onDrop={handleDrop}
+                  className={`rounded-2xl border-2 border-dashed p-6 text-center transition-all ${
+                    isDragging
+                      ? "border-purple-400 bg-purple-500/10"
+                      : "border-[#30363d] bg-[#0d1117] hover:border-purple-500/60"
+                  }`}
+                >
+                  <Upload className="mx-auto mb-3 h-8 w-8 text-purple-400" />
+
+                  <div className="font-semibold text-white">
+                    {isDragging
+                      ? "Drop your image here"
+                      : "Drag & drop your image here"}
                   </div>
-                )}
+
+                  <div className="mt-1 text-[11px] text-[#8b949e]">
+                    JPG, PNG, WEBP, GIF or AVIF · Max 10 MB
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isUploading}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 font-bold text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" />
+                        Choose Image
+                      </>
+                    )}
+                  </button>
+
+                  <div className="mt-3 text-[10px] text-[#6e7681]">
+                    On mobile, this button opens your device&apos;s photo/file picker.
+                  </div>
+                </div>
               </div>
 
-              <label className="flex items-center gap-2 p-3 bg-[#0d1117] border border-[#30363d] rounded-xl cursor-pointer">
+              <div className="flex items-center gap-2">
+                <div className="h-px flex-1 bg-[#30363d]" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#6e7681]">
+                  Or use image URL
+                </span>
+                <div className="h-px flex-1 bg-[#30363d]" />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-1.5 font-semibold text-white">
+                  <LinkIcon className="h-3.5 w-3.5 text-purple-400" />
+                  Image URL
+                </label>
+
+                <input
+                  type="url"
+                  value={formImageUrl}
+                  onChange={(event) => setFormImageUrl(event.target.value)}
+                  placeholder="https://example.com/photo.jpg"
+                  className="w-full rounded-xl border border-[#30363d] bg-[#0b0e14] p-2.5 text-white focus:border-purple-500 focus:outline-none"
+                />
+              </div>
+
+              {formImageUrl && (
+                <div className="overflow-hidden rounded-2xl border border-[#30363d] bg-black">
+                  <div className="border-b border-[#30363d] bg-[#0d1117] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#8b949e]">
+                    Image Preview
+                  </div>
+
+                  <div className="aspect-video">
+                    <img
+                      src={formImageUrl}
+                      alt="Gallery preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[#30363d] bg-[#0d1117] p-3">
                 <input
                   type="checkbox"
                   checked={formFeatured}
-                  onChange={(e) => setFormFeatured(e.target.checked)}
-                  className="w-4 h-4 accent-purple-500 rounded"
+                  onChange={(event) =>
+                    setFormFeatured(event.target.checked)
+                  }
+                  className="h-4 w-4 rounded accent-purple-500"
                 />
+
                 <div>
-                  <span className="font-semibold text-white block">Feature On Homepage</span>
-                  <span className="text-[11px] text-[#8b949e]">Showcases in the featured gallery showcase.</span>
+                  <span className="block font-semibold text-white">
+                    Feature On Homepage
+                  </span>
+                  <span className="text-[11px] text-[#8b949e]">
+                    Show this artwork in the featured gallery showcase.
+                  </span>
                 </div>
               </label>
 
-              <div className="p-4 bg-[#0d1117] border-t border-[#30363d] flex justify-end gap-2 -mx-6 -mb-6 mt-4">
+              <div className="-mx-6 -mb-6 mt-4 flex justify-end gap-2 border-t border-[#30363d] bg-[#0d1117] p-5">
                 <button
                   type="button"
+                  disabled={isSaving || isUploading}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-[#21262d] hover:bg-[#30363d] text-white rounded-xl cursor-pointer"
+                  className="rounded-xl bg-[#21262d] px-4 py-2 text-white hover:bg-[#30363d] disabled:opacity-50"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-md shadow-purple-600/20 cursor-pointer"
+                  disabled={isSaving || isUploading || !formImageUrl.trim()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2 font-bold text-white shadow-md shadow-purple-600/20 hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Save Artwork
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      Save Artwork
+                    </>
+                  )}
                 </button>
               </div>
             </form>
