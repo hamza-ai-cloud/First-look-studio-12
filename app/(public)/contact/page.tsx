@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin, MessageCircle, Send, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Herr_Von_Muellerhoff } from 'next/font/google';
+const Herr_Von_Muellerhoff = { className: '' };
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });

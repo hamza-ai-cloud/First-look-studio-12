@@ -36,49 +36,57 @@ const footerNav = [
   },
 ];
 
-const branches = [
-  {
-    name: 'First Look Studio',
-    address:
-      '36 Sector 2-C-II, Butt Chowk, College Rd, Near NADRA Office, Block 2, Township Sector C-2, Lahore 54600, Pakistan',
-    maps:
-      'https://maps.app.goo.gl/zao6p2oXVYS8KziaA',
-    phone: '+92 (321) 828-2444',
-    phoneHref: 'tel:+923218282444',
-    whatsappHref: 'https://wa.me/923218282444',
-    email: 'helplinestudio@gmail.com',
-    emailHref: 'mailto:helplinestudio@gmail.com',
-    hours: 'Mon - Sat • 9:00 AM - 9:30 PM',
-  },
-  {
-    name: 'First Look Studio 2',
-    address:
-      'Flat No.149, N, model, Model Town Extension Block N Central Flats town, Lahore, 54770, Pakistan',
-    maps:
-      'https://maps.app.goo.gl/2VShW3EvNppvG47k9',
-    phone: '+92 (305) 228-8884',
-    phoneHref: 'tel:+923052288884',
-    whatsappHref: 'https://wa.me/923052288884',
-    email: 'helplinestudio@gmail.com',
-    emailHref: 'mailto:helplinestudio@gmail.com',
-    hours: 'Mon - Sat • 9:00 AM - 9:30 PM',
-  },
-  {
-    name: 'First Look Studio 3',
-    address:
-      '7-B, Faisal Garden, University of Management & Technology Rd, Block C2 Block C 2 Phase 1 Johar Town, Lahore, 54000, Pakistan',
-    maps:
-      'https://maps.app.goo.gl/keVmstewQ32KPQwx9',
-    phone: '+92 (322) 254-9513',
-    phoneHref: 'tel:+923222549513',
-    whatsappHref: 'https://wa.me/923222549513',
-    email: 'firstlookkashif@gmail.com',
-    emailHref: 'mailto:firstlookkashif@gmail.com',
-    hours: 'Mon - Sat • 9:00 AM - 9:30 PM',
-  },
-];
 
-export default function Footer() {
+
+interface FooterBranch {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  hours: string | null;
+  maps_url: string | null;
+  whatsapp_url: string | null;
+  display_phone: string | null;
+  is_active: boolean;
+  sort_order: number;
+
+  // Existing Footer UI compatibility
+  maps?: string;
+  phoneHref?: string;
+  whatsappHref?: string;
+  emailHref?: string;
+}
+
+interface FooterProps {
+  branches?: FooterBranch[];
+  siteName?: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  hours?: string;
+  instagram?: string;
+  facebook?: string;
+  youtube?: string;
+  tiktok?: string;
+  copyright?: string;
+}
+
+export default function Footer({
+  branches = [],
+  siteName = "First Look Studio",
+  description = "",
+  email = "",
+  phone = "",
+  address = "",
+  hours = "",
+  instagram = "",
+  facebook = "",
+  youtube = "",
+  tiktok = "",
+  copyright = "",
+}: FooterProps) {
   return (
     <footer className="relative border-t border-white/10 bg-black/40 backdrop-blur-xl">
       <div className="container-luxury py-16">
@@ -145,7 +153,7 @@ export default function Footer() {
                 {branch.name}
               </h4>
               <a
-                href={branch.maps}
+                href={branch.maps_url || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Open in Google Maps"
@@ -155,14 +163,14 @@ export default function Footer() {
                 <span>{branch.address}</span>
               </a>
               <a
-                href={branch.phoneHref}
+                href={branch.phone ? `tel:${branch.phone.replace(/[^0-9+]/g, '')}` : undefined}
                 className="flex items-center gap-3 hover:text-gold-400 transition-colors"
               >
                 <Phone className="w-4 h-4 text-gold-400 shrink-0" />
                 <span>{branch.phone}</span>
               </a>
               <a
-                href={branch.whatsappHref}
+                href={branch.whatsapp_url || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex w-fit items-center gap-2 rounded-full border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 font-semibold text-[#25D366] shadow-[0_0_0_1px_rgba(37,211,102,0.08),0_6px_16px_rgba(37,211,102,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03] hover:bg-[#25D366]/20 hover:text-[#1DA851] hover:shadow-[0_8px_22px_rgba(37,211,102,0.2)]"
@@ -171,7 +179,7 @@ export default function Footer() {
                 <span>WhatsApp</span>
               </a>
               <a
-                href={branch.emailHref}
+                href={branch.email ? `mailto:${branch.email}` : undefined}
                 className="flex items-center gap-3 hover:text-gold-400 transition-colors"
               >
                 <Mail className="w-4 h-4 text-gold-400 shrink-0" />
@@ -188,7 +196,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} First Look Studio. All rights reserved.
+            © {new Date().getFullYear()} {copyright || siteName}. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
             Crafted with passion for visual storytelling.

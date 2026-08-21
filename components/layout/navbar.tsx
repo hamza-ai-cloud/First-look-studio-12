@@ -30,7 +30,17 @@ const moreNav = [
 
 const allLinks = [...mainNav, ...moreNav];
 
-export default function Navbar() {
+interface NavbarProps {
+  siteName?: string;
+  tagline?: string;
+  logoUrl?: string;
+}
+
+export default function Navbar({
+  siteName = 'First Look Studio',
+  tagline = 'STUDIO',
+  logoUrl,
+}: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -69,18 +79,38 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
             <div className="relative">
-              <Camera className="w-7 h-7 text-gold-400 group-hover:rotate-12 transition-transform" strokeWidth={1.5} />
-              <div className="absolute inset-0 blur-md opacity-50">
-                <Camera className="w-7 h-7 text-gold-400" strokeWidth={1.5} />
-              </div>
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={siteName}
+                  className="h-9 w-auto object-contain"
+                />
+              ) : (
+                <>
+                  <Camera
+                    className="w-7 h-7 text-gold-400 group-hover:rotate-12 transition-transform"
+                    strokeWidth={1.5}
+                  />
+                  <div className="absolute inset-0 blur-md opacity-50">
+                    <Camera
+                      className="w-7 h-7 text-gold-400"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                </>
+              )}
             </div>
+
             <div className="flex flex-col leading-none">
               <span className="font-display text-base font-bold tracking-wider text-foreground">
-                FIRST LOOK
+                {siteName}
               </span>
-              <span className="font-display text-[10px] tracking-[0.3em] gold-text">
-                STUDIO
-              </span>
+
+              {tagline && (
+                <span className="font-display text-[10px] tracking-[0.3em] gold-text">
+                  {tagline}
+                </span>
+              )}
             </div>
           </Link>
 

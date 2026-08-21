@@ -11,6 +11,7 @@ interface AdminUser {
   email: string;
   password_hash: string;
   role: string | null;
+  is_active?: boolean;
 }
 
 function isAdminRole(role: string | null | undefined): role is AdminRole {
@@ -51,7 +52,7 @@ export const authOptions: NextAuthOptions = {
 
         const { data, error } = await supabaseAdmin
           .from('admins')
-          .select('id, email, password_hash, role')
+          .select('id, email, password_hash, role, is_active')
           .eq('email', email)
           .maybeSingle();
 
@@ -65,7 +66,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        if (!isAdminRole(admin.role)) {
+        if (!isAdminRole(admin.role) || admin.is_active === false) {
           return null;
         }
 
@@ -77,6 +78,13 @@ export const authOptions: NextAuthOptions = {
         if (!passwordValid) {
           return null;
         }
+
+        await supabaseAdmin
+          .from('admins')
+          .update({
+            last_login_at: new Date().toISOString(),
+          })
+          .eq('id', admin.id);
 
         return {
           id: admin.id,
