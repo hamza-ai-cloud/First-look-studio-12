@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { sendAdminNotification } from '@/lib/email';
 import { isValidEmail, normalizeText } from '@/lib/validators';
 
 export const runtime = 'nodejs';
@@ -108,6 +109,25 @@ export async function POST(request: Request) {
       return errorResponse(
         'Unable to submit your application right now. Please try again later.',
         500
+      );
+    }
+
+    try {
+      await sendAdminNotification({
+        subject: `New career application: ${position} — ${name}`,
+        text: [
+          `New career application received from ${name} (${email}).`,
+          `Position: ${position}`,
+          `Portfolio: ${portfolio || 'Not provided'}`,
+          '',
+          'Message:',
+          message,
+        ].join('\\n'),
+      });
+    } catch (notificationError) {
+      console.error(
+        'Career notification error:',
+        notificationError
       );
     }
 

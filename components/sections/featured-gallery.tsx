@@ -2,9 +2,24 @@
 
 import { motion } from 'framer-motion';
 import { galleryImages } from '@/lib/pexels-data';
+import type { PublicGalleryItem } from '@/lib/cms/public';
 
-export default function FeaturedGallery() {
-  const images = galleryImages;
+interface FeaturedGalleryProps {
+  items?: PublicGalleryItem[];
+}
+
+export default function FeaturedGallery({
+  items = [],
+}: FeaturedGalleryProps) {
+  const images =
+    items.length > 0
+      ? items.map((item) => ({
+          src: {
+            large: item.image_url,
+          },
+          alt: item.title,
+        }))
+      : galleryImages;
 
   return (
     <section className="relative section-padding-y overflow-hidden">

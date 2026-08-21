@@ -15,7 +15,7 @@ import {
   FileText,
   X,
   UserRound,
-} from "lucide-react";
+  CreditCard,} from "lucide-react";
 import type { BookingRecord, BookingStatus } from "@/lib/types";
 
 interface BookingsViewProps {
@@ -94,6 +94,21 @@ export default function BookingsView({
         return "bg-blue-500/10 text-blue-400 border-blue-500/30";
       case "cancelled":
         return "bg-rose-500/10 text-rose-400 border-rose-500/30";
+      default:
+        return "bg-[#21262d] text-[#8b949e] border-[#30363d]";
+    }
+  };
+
+  const getPaymentBadge = (status?: string | null) => {
+    switch (status) {
+      case "paid":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+      case "pending":
+        return "bg-amber-500/10 text-amber-400 border-amber-500/30";
+      case "failed":
+        return "bg-rose-500/10 text-rose-400 border-rose-500/30";
+      case "refunded":
+        return "bg-blue-500/10 text-blue-400 border-blue-500/30";
       default:
         return "bg-[#21262d] text-[#8b949e] border-[#30363d]";
     }
@@ -216,7 +231,8 @@ export default function BookingsView({
                   <th className="px-4 py-3.5 font-semibold">Service</th>
                   <th className="px-4 py-3.5 font-semibold">Event</th>
                   <th className="px-4 py-3.5 font-semibold">Photographer</th>
-                  <th className="px-4 py-3.5 font-semibold">Status</th>
+                  <th className="px-4 py-3.5 font-semibold">Booking Status</th>
+                  <th className="px-4 py-3.5 font-semibold">Payment</th>
                   <th className="px-4 py-3.5 text-right font-semibold">
                     Actions
                   </th>
@@ -292,6 +308,24 @@ export default function BookingsView({
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
+                    </td>
+
+                    <td className="px-4 py-3.5">
+                      <div
+                        className={`inline-flex rounded-lg border px-2.5 py-1 text-[11px] font-mono font-bold uppercase ${getPaymentBadge(
+                          booking.payment_status
+                        )}`}
+                      >
+                        {booking.payment_status || "unpaid"}
+                      </div>
+
+                      {booking.payment_amount !== null &&
+                        booking.payment_amount !== undefined && (
+                          <div className="mt-1 text-[10px] text-[#8b949e]">
+                            {booking.payment_currency?.toUpperCase() || "USD"}{" "}
+                            {Number(booking.payment_amount).toFixed(2)}
+                          </div>
+                        )}
                     </td>
 
                     <td className="px-4 py-3.5 text-right">
@@ -400,6 +434,67 @@ export default function BookingsView({
                   <div className="flex items-center gap-1.5 text-[#8b949e]">
                     <UserRound className="h-3.5 w-3.5" />
                     {selectedBooking.photographer}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-[#30363d] bg-[#0d1117] p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-emerald-400" />
+                    <span className="font-semibold text-white">
+                      Payment Information
+                    </span>
+                  </div>
+
+                  <span
+                    className={`rounded-lg border px-2.5 py-1 text-[10px] font-mono font-bold uppercase ${
+                      getPaymentBadge(selectedBooking.payment_status)
+                    }`}
+                  >
+                    {selectedBooking.payment_status || "unpaid"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div>
+                    <div className="text-[10px] uppercase text-[#8b949e]">
+                      Amount
+                    </div>
+                    <div className="mt-1 font-semibold text-white">
+                      {selectedBooking.payment_amount != null
+                        ? `${selectedBooking.payment_currency || "USD"} ${selectedBooking.payment_amount}`
+                        : "Not paid"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[10px] uppercase text-[#8b949e]">
+                      Provider
+                    </div>
+                    <div className="mt-1 font-semibold text-white">
+                      {selectedBooking.payment_provider || "—"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[10px] uppercase text-[#8b949e]">
+                      Reference
+                    </div>
+                    <div className="mt-1 truncate font-mono text-[11px] text-white">
+                      {selectedBooking.payment_reference || "—"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[10px] uppercase text-[#8b949e]">
+                      Paid On
+                    </div>
+                    <div className="mt-1 font-semibold text-white">
+                      {selectedBooking.paid_at
+                        ? formatDate(selectedBooking.paid_at)
+                        : "—"}
+                    </div>
                   </div>
                 </div>
               </div>

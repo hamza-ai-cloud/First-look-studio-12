@@ -4,10 +4,37 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import type { PublicNewsletterContent } from '@/lib/cms/public';
 
-export default function NewsletterSection() {
+interface NewsletterSectionProps {
+  content?: PublicNewsletterContent;
+}
+
+export default function NewsletterSection({
+  content,
+}: NewsletterSectionProps) {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const eyebrow =
+    content?.eyebrow || 'NEWSLETTER';
+
+  const heading =
+    content?.heading || 'Stay in the Frame';
+
+  const description =
+    content?.description ||
+    '{description}';
+
+  const inputPlaceholder =
+    content?.input_placeholder || 'your@email.com';
+
+  const buttonText =
+    content?.button_text || 'Subscribe';
+
+  const successText =
+    content?.success_text ||
+    'Subscribed! Welcome to the First Look family.';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +55,7 @@ export default function NewsletterSection() {
         throw new Error(data.message || 'Unable to subscribe.');
       }
 
-      toast.success(data.message || 'Subscribed! Welcome to the First Look family.');
+      toast.success(data.message || successText);
       setEmail('');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to subscribe.');
@@ -50,21 +77,21 @@ export default function NewsletterSection() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass gold-border mb-6">
             <Mail className="w-4 h-4 text-gold-400" />
             <span className="text-xs font-medium tracking-wider text-gold-200">
-              NEWSLETTER
+              {eyebrow}
             </span>
           </div>
           <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
-            Stay in the Frame
+            {heading}
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            Subscribe for exclusive offers, photography tips, and behind-the-scenes content.
+            {description}
           </p>
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={inputPlaceholder}
               required
               className="flex-1 px-4 py-3 rounded-xl glass border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold-400/50 transition-colors"
             />
@@ -78,7 +105,7 @@ export default function NewsletterSection() {
                   Done
                 </>
               ) : (
-                'Subscribe'
+                buttonText
               )}
             </button>
           </form>

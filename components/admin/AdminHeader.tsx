@@ -57,7 +57,7 @@ type NavGroup = {
 
 const groups: NavGroup[] = [
   {
-    label: "Overview",
+    label: "Main",
     icon: LayoutDashboard,
     items: [
       {
@@ -68,7 +68,7 @@ const groups: NavGroup[] = [
     ],
   },
   {
-    label: "Business",
+    label: "Your Business",
     icon: BriefcaseBusiness,
     items: [
       {
@@ -80,6 +80,16 @@ const groups: NavGroup[] = [
         label: "Messages",
         href: "/admin/messages",
         icon: MessageSquare,
+      },
+      {
+        label: "Services",
+        href: "/admin/services",
+        icon: FolderOpen,
+      },
+      {
+        label: "Gallery",
+        href: "/admin/gallery",
+        icon: GalleryHorizontalEnd,
       },
       {
         label: "Careers",
@@ -98,7 +108,7 @@ const groups: NavGroup[] = [
     icon: Globe2,
     items: [
       {
-        label: "Content Center",
+        label: "Edit Website",
         href: "/admin/cms",
         icon: Sparkles,
       },
@@ -108,50 +118,39 @@ const groups: NavGroup[] = [
         icon: FileText,
       },
       {
-        label: "Media Library",
+        label: "Photos & Media",
         href: "/admin/cms/media",
         icon: Image,
       },
       {
-        label: "Navigation",
+        label: "Menu",
         href: "/admin/cms/navigation",
         icon: Menu,
       },
       {
-        label: "SEO Manager",
+        label: "SEO",
         href: "/admin/cms/seo",
         icon: Search,
       },
       {
-        label: "Services",
-        href: "/admin/services",
-        icon: FolderOpen,
+        label: "Branches",
+        href: "/admin/cms/branches",
+        icon: Globe2,
       },
       {
-        label: "Gallery",
-        href: "/admin/gallery",
-        icon: GalleryHorizontalEnd,
-      },
-    ],
-  },
-  {
-    label: "Design",
-    icon: Palette,
-    items: [
-      {
-        label: "Theme Studio",
+        label: "Design",
         href: "/admin/cms/theme",
         icon: Palette,
       },
       {
-        label: "Site Settings",
+        label: "Settings",
         href: "/admin/cms/settings",
         icon: Settings,
       },
     ],
   },
   {
-    label: "Administration",
+    label: "Admin",
     icon: ShieldCheck,
     superAdminOnly: true,
     items: [

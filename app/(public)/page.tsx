@@ -1,4 +1,4 @@
-import { getPublicHero } from '@/lib/cms/public';
+import { getPublicHomeSections, getPublicServices, getPublicFeaturedGallery, getPublicAboutContent } from '@/lib/cms/public';
 
 import HeroSection from '@/components/sections/hero-section';
 import ServicesSlider from '@/components/sections/services-slider';
@@ -10,18 +10,74 @@ import CTASection from '@/components/sections/cta-section';
 import NewsletterSection from '@/components/sections/newsletter-section';
 
 export default async function HomePage() {
-  const hero = await getPublicHero();
+  const [
+    sections,
+    publicServices,
+    publicGallery,
+    publicAbout,
+  ] = await Promise.all([
+    getPublicHomeSections(),
+    getPublicServices(),
+    getPublicFeaturedGallery(),
+    getPublicAboutContent(),
+  ]);
 
   return (
     <>
-      <HeroSection content={hero} />
-      <ServicesSlider />
-      <FeaturedGallery />
-      <AboutPreview />
-      <TestimonialsSection />
-      <BlogPreview />
-      <CTASection />
-      <NewsletterSection />
+      {sections.map((section) => {
+        switch (section.section_key) {
+          case 'hero':
+            return (
+              <HeroSection
+                key={section.id}
+                content={section.content}
+              />
+            );
+
+          case 'services':
+            return (
+              <ServicesSlider
+                key={section.id}
+                services={
+                  publicServices.length > 0
+                    ? publicServices
+                    : undefined
+                }
+              />
+            );
+
+          case 'gallery':
+            return (
+              <FeaturedGallery
+                key={section.id}
+                items={publicGallery}
+              />
+            );
+
+          case 'about':
+            return (
+              <AboutPreview
+                key={section.id}
+                content={publicAbout}
+              />
+            );
+
+          case 'testimonials':
+            return <TestimonialsSection key={section.id} />;
+
+          case 'blog':
+            return <BlogPreview key={section.id} />;
+
+          case 'cta':
+            return <CTASection key={section.id} />;
+
+          case 'newsletter':
+            return <NewsletterSection key={section.id} />;
+
+          default:
+            return null;
+        }
+      })}
     </>
   );
 }

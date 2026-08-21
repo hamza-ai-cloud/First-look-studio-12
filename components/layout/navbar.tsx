@@ -8,6 +8,7 @@ import { Camera, Menu, X, Moon, Sun, ChevronDown } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import type { PublicNavigationItem } from '@/lib/cms/public';
 
 const mainNav = [
   { label: 'Home', href: '/' },
@@ -34,12 +35,16 @@ interface NavbarProps {
   siteName?: string;
   tagline?: string;
   logoUrl?: string;
+  navigation?: PublicNavigationItem[];
+  mobileNavigation?: PublicNavigationItem[];
 }
 
 export default function Navbar({
   siteName = 'First Look Studio',
   tagline = 'STUDIO',
   logoUrl,
+  navigation = [],
+  mobileNavigation = [],
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -47,6 +52,24 @@ export default function Navbar({
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+
+  const cmsNavigation =
+    navigation.length > 0 ? navigation : allLinks.map((link, index) => ({
+      id: `fallback-${index}`,
+      location: 'header',
+      label: link.label,
+      href: link.href,
+      icon: null,
+      parent_id: null,
+      sort_order: index,
+      is_visible: true,
+      open_new_tab: false,
+    }));
+
+  const cmsMobileNavigation =
+    mobileNavigation.length > 0
+      ? mobileNavigation
+      : cmsNavigation;
 
   useEffect(() => setMounted(true), []);
 
@@ -116,50 +139,72 @@ export default function Navbar({
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-1">
-            {mainNav.map((link) => (
-              <NavLink key={link.href} href={link.href} active={pathname === link.href}>
+            {cmsNavigation.slice(0, 6).map((link) => (
+              <NavLink
+                key={link.id}
+                href={link.href}
+                active={pathname === link.href}
+                openNewTab={link.open_new_tab}
+              >
                 {link.label}
               </NavLink>
             ))}
-            {/* More dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setMoreOpen(true)}
-              onMouseLeave={() => setMoreOpen(false)}
-            >
-              <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                More
-                <ChevronDown className={cn('w-4 h-4 transition-transform', moreOpen && 'rotate-180')} />
-              </button>
-              <AnimatePresence>
-                {moreOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 pt-2"
-                  >
-                    <div className="glass-dark rounded-xl p-2 min-w-[180px] shadow-xl">
-                      {moreNav.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className={cn(
-                            'block px-4 py-2 text-sm rounded-lg transition-colors',
-                            pathname === link.href
-                              ? 'text-gold-400 bg-gold-400/10'
-                              : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                          )}
-                        >
-                          {link.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+
+            {cmsNavigation.length > 6 && (
+              <div
+                className="relative"
+                onMouseEnter={() => setMoreOpen(true)}
+                onMouseLeave={() => setMoreOpen(false)}
+              >
+                <button
+                  type="button"
+                  className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  More
+                  <ChevronDown
+                    className={cn(
+                      "w-4 h-4 transition-transform",
+                      moreOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {moreOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 pt-2"
+                    >
+                      <div className="glass-dark rounded-xl p-2 min-w-[180px] shadow-xl">
+                        {cmsNavigation.slice(6).map((link) => (
+                          <Link
+                            key={link.id}
+                            href={link.href}
+                            target={link.open_new_tab ? "_blank" : undefined}
+                            rel={
+                              link.open_new_tab
+                                ? "noopener noreferrer"
+                                : undefined
+                            }
+                            className={cn(
+                              "block px-4 py-2 text-sm rounded-lg transition-colors",
+                              pathname === link.href
+                                ? "text-gold-400 bg-gold-400/10"
+                                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                            )}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
 
           {/* Right actions */}
@@ -223,7 +268,7 @@ export default function Navbar({
                 </button>
               </div>
               <div className="flex flex-col gap-1">
-                {allLinks.map((link, i) => (
+                {cmsMobileNavigation.map((link, i) => (
                   <motion.div
                     key={link.href}
                     initial={{ opacity: 0, x: 20 }}
@@ -232,6 +277,8 @@ export default function Navbar({
                   >
                     <Link
                       href={link.href}
+                      target={link.open_new_tab ? '_blank' : undefined}
+                      rel={link.open_new_tab ? 'noopener noreferrer' : undefined}
                       className={cn(
                         'block px-4 py-3 rounded-xl text-base font-medium transition-colors',
                         pathname === link.href
@@ -260,15 +307,19 @@ export default function Navbar({
 function NavLink({
   href,
   active,
+  openNewTab,
   children,
 }: {
   href: string;
   active: boolean;
+  openNewTab?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
+      target={openNewTab ? '_blank' : undefined}
+      rel={openNewTab ? 'noopener noreferrer' : undefined}
       className={cn(
         'relative px-4 py-2 text-sm font-medium transition-colors',
         active ? 'text-gold-400' : 'text-muted-foreground hover:text-foreground'

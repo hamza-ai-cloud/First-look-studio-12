@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import PageHeader from '@/components/sections/page-header';
-import { services } from '@/lib/data';
+import { services as fallbackServices } from '@/lib/data';
 import * as Icons from 'lucide-react';
 import { Check, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
@@ -11,7 +11,9 @@ import { useState } from 'react';
 const categories = ['All', 'Photography', 'Videography', 'Printing', 'Graphic Design'] as const;
 
 export default function ServicesPage() {
-  const [activeCategory, setActiveCategory] = useState<typeof categories[number]>('All');
+  const [services, setServices] = useState(fallbackServices);
+  const [activeCategory, setActiveCategory] =
+    useState<typeof categories[number]>('All');
 
   const filtered = activeCategory === 'All'
     ? services

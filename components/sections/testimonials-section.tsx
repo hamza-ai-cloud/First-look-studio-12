@@ -3,8 +3,20 @@
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 import { testimonials } from '@/lib/data';
+import type { PublicTestimonial } from '@/lib/cms/public';
 
-export default function TestimonialsSection() {
+interface TestimonialsSectionProps {
+  items?: PublicTestimonial[];
+}
+
+export default function TestimonialsSection({
+  items = [],
+}: TestimonialsSectionProps) {
+  const testimonialsToRender =
+    items.length > 0
+      ? items
+      : testimonials;
+
   return (
     <section className="relative section-padding-y overflow-hidden">
       {/* Background glow */}
@@ -27,7 +39,7 @@ export default function TestimonialsSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {testimonials.map((t, i) => (
+          {testimonialsToRender.map((t, i) => (
             <motion.div
               key={t.id}
               initial={{ opacity: 0, y: 30 }}

@@ -5,9 +5,33 @@ import Link from 'next/link';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
 import { blogPosts } from '@/lib/data';
 import { blogImages } from '@/lib/pexels-data';
+import type { PublicBlogPreviewContent } from '@/lib/cms/public';
 
-export default function BlogPreview() {
-  const posts = blogPosts.slice(0, 3);
+interface BlogPreviewProps {
+  content?: PublicBlogPreviewContent;
+}
+
+export default function BlogPreview({
+  content,
+}: BlogPreviewProps) {
+  const cmsPosts = content?.posts || [];
+
+  const posts =
+    cmsPosts.length > 0
+      ? cmsPosts
+      : blogPosts.slice(0, 3);
+
+  const eyebrow =
+    content?.eyebrow || '{eyebrow}';
+
+  const heading =
+    content?.heading || '{heading}';
+
+  const viewAllText =
+    content?.view_all_text || '{viewAllText}';
+
+  const viewAllUrl =
+    content?.view_all_url || '/blog';
 
   return (
     <section className="relative section-padding-y">
@@ -26,7 +50,7 @@ export default function BlogPreview() {
               From Our Blog
             </h2>
           </motion.div>
-          <Link href="/blog">
+          <Link href={viewAllUrl}>
             <button className="inline-flex items-center gap-2 text-sm font-medium text-gold-400 hover:text-gold-300 transition-colors group">
               View All Articles
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -47,7 +71,13 @@ export default function BlogPreview() {
                 <div className="group glass-card overflow-hidden hover:gold-border transition-all h-full">
                   <div className="relative aspect-[16/10] overflow-hidden">
                     <img
-                      src={blogImages[i]?.src.large}
+                      src={
+                        'image_url' in post &&
+                        typeof post.image_url === 'string' &&
+                        post.image_url
+                          ? post.image_url
+                          : blogImages[i]?.src.large
+                      }
                       alt={post.title}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

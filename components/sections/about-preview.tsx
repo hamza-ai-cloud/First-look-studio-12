@@ -2,8 +2,42 @@
 
 import { motion } from 'framer-motion';
 import { aboutImages } from '@/lib/pexels-data';
+import type { PublicAboutContent } from '@/lib/cms/public';
 
-export default function AboutPreview() {
+interface AboutPreviewProps {
+  content?: PublicAboutContent;
+}
+
+export default function AboutPreview({
+  content,
+}: AboutPreviewProps) {
+  const eyebrow =
+    content?.eyebrow || '{eyebrow}';
+
+  const heading =
+    content?.heading || 'Where Art Meets';
+
+  const headingHighlight =
+    content?.heading_highlight || 'Precision';
+
+  const paragraphs =
+    content?.paragraphs?.length
+      ? content.paragraphs
+      : [
+          'For over 15 years, First Look Studio has been a beacon of visual excellence. From breathtaking wedding cinematography to museum-quality printing, we blend artistic vision with technical mastery to deliver results that exceed expectations.',
+          'Our team of award-winning photographers, videographers, and designers work under one roof — ensuring every project, from a passport photo to a luxury wedding film, receives the same obsessive attention to detail.',
+        ];
+
+  const stats =
+    content?.stats?.length
+      ? content.stats
+      : [
+          { label: 'Award-Winning Team', value: '25+' },
+          { label: 'Studio Space', value: '5,000 sqft' },
+          { label: 'Client Satisfaction', value: '99%' },
+          { label: 'Projects Completed', value: '8,000+' },
+        ];
+
   return (
     <section className="relative section-padding-y overflow-hidden">
       <div className="container-luxury">
@@ -70,27 +104,23 @@ export default function AboutPreview() {
               About First Look
             </span>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Where Art Meets <span className="gold-text">Precision</span>
+              {heading}{' '}
+              <span className="gold-text">
+                {headingHighlight}
+              </span>
             </h2>
-            <p className="mt-5 text-base text-muted-foreground leading-relaxed">
-              For over 15 years, First Look Studio has been a beacon of visual
-              excellence. From breathtaking wedding cinematography to
-              museum-quality printing, we blend artistic vision with technical
-              mastery to deliver results that exceed expectations.
-            </p>
-            <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-              Our team of award-winning photographers, videographers, and
-              designers work under one roof — ensuring every project, from a
-              passport photo to a luxury wedding film, receives the same
-              obsessive attention to detail.
-            </p>
+            {paragraphs.map((paragraph, index) => (
+              <p
+                key={index}
+                className={`${
+                  index > 0 ? 'mt-4 ' : 'mt-5 '
+                }text-base text-muted-foreground leading-relaxed`}
+              >
+                {paragraph}
+              </p>
+            ))}
             <div className="mt-8 grid grid-cols-2 gap-4">
-              {[
-                { label: 'Award-Winning Team', value: '25+' },
-                { label: 'Studio Space', value: '5,000 sqft' },
-                { label: 'Client Satisfaction', value: '99%' },
-                { label: 'Projects Completed', value: '8,000+' },
-              ].map((item, i) => (
+              {stats.map((item, i) => (
                 <div key={i} className="glass-card p-4">
                   <div className="font-display text-2xl font-bold gold-text">
                     {item.value}

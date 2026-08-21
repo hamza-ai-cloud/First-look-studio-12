@@ -149,16 +149,16 @@ export default function DashboardView({
               </div>
 
               <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#8b949e]">
-                Command Center
+                Business Dashboard
               </span>
             </div>
 
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Welcome back, Admin
+              Welcome back 👋
             </h1>
 
             <p className="mt-1 text-sm text-[#8b949e]">
-              Here's what is happening across First Look Studio today.
+              Here is a simple overview of your studio today.
             </p>
           </div>
 
@@ -171,7 +171,7 @@ export default function DashboardView({
               </span>
 
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                System Online
+                Everything is working
               </span>
             </div>
 
@@ -210,7 +210,7 @@ export default function DashboardView({
           <div className="relative flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Confirmed Revenue
+                Money Earned
               </p>
 
               <h2 className="mt-3 text-2xl font-bold tracking-tight">
@@ -219,7 +219,7 @@ export default function DashboardView({
 
               <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-400">
                 <TrendingUp className="h-3 w-3" />
-                {confirmed.length + completed.length} completed value bookings
+                {confirmed.length + completed.length} confirmed & completed bookings
               </div>
             </div>
 
@@ -240,7 +240,7 @@ export default function DashboardView({
           <div className="relative flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Pending Pipeline
+                Bookings To Review
               </p>
 
               <h2 className="mt-3 text-2xl font-bold">
@@ -249,7 +249,7 @@ export default function DashboardView({
 
               <div className="mt-2 flex items-center gap-1.5 text-[10px] text-amber-400">
                 <Clock3 className="h-3 w-3" />
-                {formatMoney(pendingValue)} awaiting review
+                {formatMoney(pendingValue)} waiting for your review
               </div>
             </div>
 
@@ -268,7 +268,7 @@ export default function DashboardView({
           <div className="relative flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Unique Clients
+                Clients
               </p>
 
               <h2 className="mt-3 text-2xl font-bold">
@@ -277,7 +277,7 @@ export default function DashboardView({
 
               <div className="mt-2 flex items-center gap-1.5 text-[10px] text-blue-400">
                 <Users className="h-3 w-3" />
-                From booking activity
+                people who have booked
               </div>
             </div>
 
@@ -288,7 +288,7 @@ export default function DashboardView({
         </div>
 
 
-        {/* Conversion */}
+        {/* Booking Success */}
         <div className="group relative overflow-hidden rounded-2xl border border-[#30363d] bg-[#0d1117] p-5 transition hover:-translate-y-0.5 hover:border-[#c99634]/40">
 
           <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[#c99634]/5 blur-2xl" />
@@ -296,7 +296,7 @@ export default function DashboardView({
           <div className="relative flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Conversion
+                Booking Success
               </p>
 
               <h2 className="mt-3 text-2xl font-bold">
@@ -305,7 +305,7 @@ export default function DashboardView({
 
               <div className="mt-2 flex items-center gap-1.5 text-[10px] text-[#d4a33d]">
                 <BarChart3 className="h-3 w-3" />
-                Confirmed + completed
+                confirmed or completed
               </div>
             </div>
 
@@ -328,10 +328,10 @@ export default function DashboardView({
           <div className="mb-5 flex items-center justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Booking Pipeline
+                Booking Status
               </p>
               <h3 className="mt-1 text-sm font-semibold">
-                Current business flow
+                See what needs your attention
               </h3>
             </div>
 
@@ -386,7 +386,7 @@ export default function DashboardView({
 
           <div className="mt-5">
             <div className="mb-2 flex justify-between text-[10px]">
-              <span className="text-[#8b949e]">Pipeline completion</span>
+              <span className="text-[#8b949e]">Bookings completed</span>
               <span className="font-mono text-white">{conversion}%</span>
             </div>
 
@@ -402,15 +402,15 @@ export default function DashboardView({
         </div>
 
 
-        {/* Quick Actions */}
+        {/* What do you want to do? */}
         <div className="rounded-2xl border border-[#30363d] bg-[#0d1117] p-5">
 
           <div className="mb-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-              Control Panel
+              What do you want to do?
             </p>
             <h3 className="mt-1 text-sm font-semibold">
-              Quick Actions
+              What do you want to do?
             </h3>
           </div>
 
@@ -422,7 +422,7 @@ export default function DashboardView({
             >
               <span className="flex items-center gap-3">
                 <CalendarCheck2 className="h-4 w-4 text-amber-400" />
-                <span className="text-xs font-medium">Manage bookings</span>
+                <span className="text-xs font-medium">Manage Bookings</span>
               </span>
               <ArrowRight className="h-3.5 w-3.5 text-[#8b949e]" />
             </Link>
@@ -433,7 +433,7 @@ export default function DashboardView({
             >
               <span className="flex items-center gap-3">
                 <MessageSquare className="h-4 w-4 text-blue-400" />
-                <span className="text-xs font-medium">Open messages</span>
+                <span className="text-xs font-medium">Read Messages</span>
               </span>
               <ArrowRight className="h-3.5 w-3.5 text-[#8b949e]" />
             </Link>
@@ -444,7 +444,7 @@ export default function DashboardView({
             >
               <span className="flex items-center gap-3">
                 <Package className="h-4 w-4 text-purple-400" />
-                <span className="text-xs font-medium">Manage services</span>
+                <span className="text-xs font-medium">Manage Services</span>
               </span>
               <ArrowRight className="h-3.5 w-3.5 text-[#8b949e]" />
             </Link>
@@ -455,7 +455,7 @@ export default function DashboardView({
             >
               <span className="flex items-center gap-3">
                 <GalleryHorizontalEnd className="h-4 w-4 text-pink-400" />
-                <span className="text-xs font-medium">Manage gallery</span>
+                <span className="text-xs font-medium">Manage Gallery</span>
               </span>
               <ArrowRight className="h-3.5 w-3.5 text-[#8b949e]" />
             </Link>
@@ -477,10 +477,10 @@ export default function DashboardView({
           <div className="flex items-center justify-between border-b border-[#30363d] p-5">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Live Activity
+                Latest Activity
               </p>
               <h3 className="mt-1 text-sm font-semibold">
-                Recent Booking Requests
+                Recent Bookings
               </h3>
             </div>
 
@@ -585,11 +585,11 @@ export default function DashboardView({
           <div className="flex items-center justify-between border-b border-[#30363d] p-5">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8b949e]">
-                Communication
+                Messages
               </p>
 
               <h3 className="mt-1 text-sm font-semibold">
-                Client Inbox
+                Client Messages
               </h3>
             </div>
 
@@ -677,7 +677,7 @@ export default function DashboardView({
               href="/admin/messages"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#161b22] py-2.5 text-[10px] font-bold uppercase tracking-wider text-[#c9d1d9] transition hover:bg-[#21262d] hover:text-white"
             >
-              Open Message Center
+              View All Messages
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -686,7 +686,7 @@ export default function DashboardView({
 
 
       {/* ========================================================= */}
-      {/* SYSTEM OVERVIEW */}
+      {/* WEBSITE OVERVIEW */}
       {/* ========================================================= */}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -699,7 +699,7 @@ export default function DashboardView({
 
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#8b949e]">
-                Service Catalog
+                Services
               </p>
               <p className="mt-0.5 text-sm font-semibold">
                 {services.length} packages
@@ -719,10 +719,10 @@ export default function DashboardView({
 
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#8b949e]">
-                Portfolio
+                Gallery
               </p>
               <p className="mt-0.5 text-sm font-semibold">
-                {gallery.length} artworks
+                {gallery.length} photos
               </p>
             </div>
           </div>
@@ -739,10 +739,10 @@ export default function DashboardView({
 
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#8b949e]">
-                Platform Status
+                Website Status
               </p>
               <p className="mt-0.5 text-sm font-semibold text-emerald-400">
-                All systems operational
+                Website is working normally
               </p>
             </div>
           </div>

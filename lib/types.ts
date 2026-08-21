@@ -79,6 +79,21 @@ export interface BookingRecord {
 
   total_price?: number | null;
 
+  payment_status?:
+    | 'unpaid'
+    | 'pending'
+    | 'paid'
+    | 'failed'
+    | 'refunded'
+    | string
+    | null;
+  payment_provider?: string | null;
+  payment_reference?: string | null;
+  payment_amount?: number | null;
+  payment_currency?: string | null;
+  paid_at?: string | null;
+  payment_metadata?: Record<string, unknown> | null;
+
   notes?: string | null;
 
   status: BookingStatus;

@@ -7,10 +7,11 @@ import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { X, ZoomIn } from 'lucide-react';
 
-const allGalleryImages = [...galleryImages, ...portfolioImages];
+const fallbackGalleryImages = [...galleryImages, ...portfolioImages];
 
 export default function GalleryPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
 
   return (
     <>
@@ -24,7 +25,7 @@ export default function GalleryPage() {
         <div className="container-luxury">
           {/* Masonry grid */}
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
-            {allGalleryImages.map((img, i) => (
+            {fallbackGalleryImages.map((img: (typeof fallbackGalleryImages)[number], i: number) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
@@ -74,8 +75,8 @@ export default function GalleryPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
-              src={allGalleryImages[lightboxIndex].src.large}
-              alt={allGalleryImages[lightboxIndex].alt}
+              src={fallbackGalleryImages[lightboxIndex].src.large}
+              alt={fallbackGalleryImages[lightboxIndex].alt}
               className="max-w-4xl w-full max-h-[85vh] object-contain rounded-2xl"
               onClick={(e) => e.stopPropagation()}
             />
