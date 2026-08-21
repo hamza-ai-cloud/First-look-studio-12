@@ -481,6 +481,27 @@ export type PublicGalleryItem = {
   description?: string | null;
 };
 
+export async function getPublicGallery(): Promise<PublicGalleryItem[]> {
+  const { data, error } = await supabaseAdmin
+    .from("gallery")
+    .select(
+      "id, title, image_url, category, aspect_ratio, description"
+    )
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true })
+    .limit(100);
+
+  if (error) {
+    console.error(
+      "[CMS] Failed to load public gallery:",
+      error.message
+    );
+    return [];
+  }
+
+  return (data || []) as PublicGalleryItem[];
+}
+
 export async function getPublicFeaturedGallery(): Promise<PublicGalleryItem[]> {
   const { data, error } = await supabaseAdmin
     .from("gallery")

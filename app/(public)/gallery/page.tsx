@@ -3,15 +3,61 @@
 import { motion } from 'framer-motion';
 import PageHeader from '@/components/sections/page-header';
 import { galleryImages, portfolioImages } from '@/lib/pexels-data';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { X, ZoomIn } from 'lucide-react';
 
 const fallbackGalleryImages = [...galleryImages, ...portfolioImages];
 
+type PublicGalleryImage = {
+  src: {
+    large: string;
+    medium: string;
+    small: string;
+  };
+  alt: string;
+};
+
 export default function GalleryPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [dbImages, setDbImages] = useState<PublicGalleryImage[] | null>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('/api/gallery', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) return [];
+        const result = await response.json();
+        return Array.isArray(result?.data) ? result.data : [];
+      })
+      .then((items) => {
+        if (cancelled || !items.length) return;
+
+        setDbImages(
+          items.map((item: {
+            image_url: string;
+            title: string;
+          }) => ({
+            src: {
+              large: item.image_url,
+              medium: item.image_url,
+              small: item.image_url,
+            },
+            alt: item.title,
+          }))
+        );
+      })
+      .catch(() => {
+        // Keep local Pexels fallback.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayImages = dbImages || fallbackGalleryImages;
 
   return (
     <>
@@ -25,7 +71,7 @@ export default function GalleryPage() {
         <div className="container-luxury">
           {/* Masonry grid */}
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
-            {fallbackGalleryImages.map((img: (typeof fallbackGalleryImages)[number], i: number) => (
+            {displayImages.map((img: PublicGalleryImage, i: number) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
