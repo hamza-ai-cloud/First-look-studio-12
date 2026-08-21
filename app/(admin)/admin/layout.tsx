@@ -17,14 +17,21 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession(authOptions);
 
+  const user = session?.user;
+
+  if (!user) {
+    const { redirect } = await import("next/navigation");
+    redirect("/admin/signin");
+  }
+
   const email =
-    typeof session?.user?.email === "string"
-      ? session.user.email
+    typeof user?.email === "string"
+      ? user.email
       : "Admin";
 
   const role =
-    session?.user && "role" in session.user
-      ? String(session.user.role || "admin")
+    user && "role" in user
+      ? String(user.role || "admin")
       : "admin";
 
   return (
