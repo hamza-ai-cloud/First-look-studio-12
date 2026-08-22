@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
@@ -27,8 +29,15 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: data || [],
-  });
+  return NextResponse.json(
+    {
+      success: true,
+      data: data || [],
+    },
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      },
+    }
+  );
 }
