@@ -57,7 +57,10 @@ export default function GalleryPage() {
     };
   }, []);
 
-  const displayImages = dbImages || fallbackGalleryImages;
+  // Supabase is the source of truth when the gallery request succeeds.
+  // Only fall back to the bundled images if the request itself fails.
+  const displayImages =
+    dbImages === null ? fallbackGalleryImages : dbImages;
 
   return (
     <>
@@ -121,8 +124,8 @@ export default function GalleryPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
-              src={fallbackGalleryImages[lightboxIndex].src.large}
-              alt={fallbackGalleryImages[lightboxIndex].alt}
+              src={displayImages[lightboxIndex]?.src.large || ''}
+              alt={displayImages[lightboxIndex]?.alt || ''}
               className="max-w-4xl w-full max-h-[85vh] object-contain rounded-2xl"
               onClick={(e) => e.stopPropagation()}
             />
