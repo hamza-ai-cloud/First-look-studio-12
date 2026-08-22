@@ -92,127 +92,114 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
 
-    const fileName = String(body.file_name || '').trim();
-    const storagePath = String(body.storage_path || '').trim();
-
-    if (!fileName) {
+    if (!contentType.includes('multipart/form-data')) {
       return NextResponse.json(
-        { success: false, error: 'file_name is required' },
+        {
+          success: false,
+          error: 'Media upload requires multipart/form-data',
+        },
         { status: 400 }
       );
     }
 
-    if (!storagePath) {
+    const formData = await request.formData();
+    const file = formData.get('file');
+
+    if (!(file instanceof File)) {
       return NextResponse.json(
-        { success: false, error: 'storage_path is required' },
+        { success: false, error: 'file is required' },
         { status: 400 }
       );
     }
 
-    const fileSize =
-      body.file_size === undefined ||
-      body.file_size === null ||
-      body.file_size === ''
-        ? null
-        : Number(body.file_size);
-
-    const width =
-      body.width === undefined ||
-      body.width === null ||
-      body.width === ''
-        ? null
-        : Number(body.width);
-
-    const height =
-      body.height === undefined ||
-      body.height === null ||
-      body.height === ''
-        ? null
-        : Number(body.height);
-
-    if (
-      fileSize !== null &&
-      !Number.isFinite(fileSize)
-    ) {
+    if (!file.type.startsWith('image/')) {
       return NextResponse.json(
-        { success: false, error: 'file_size must be a number' },
+        { success: false, error: 'Only image files are supported' },
         { status: 400 }
       );
     }
 
-    if (
-      width !== null &&
-      !Number.isFinite(width)
-    ) {
+    const MAX_FILE_SIZE = 15 * 1024 * 1024;
+
+    if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { success: false, error: 'width must be a number' },
+        {
+          success: false,
+          error: 'Image must be smaller than 15MB',
+        },
         { status: 400 }
       );
     }
 
-    if (
-      height !== null &&
-      !Number.isFinite(height)
-    ) {
+    const originalName = file.name.trim() || 'image';
+    const extension =
+      originalName.includes('.')
+        ? originalName.split('.').pop()?.toLowerCase() || 'bin'
+        : 'bin';
+
+    const baseName = originalName
+      .replace(/\.[^/.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'image';
+
+    const uniqueName = `${Date.now()}-${crypto.randomUUID()}`;
+    const storagePath = `general/${baseName}-${uniqueName}.${extension}`;
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('media')
+      .upload(storagePath, fileBuffer, {
+        contentType: file.type,
+        cacheControl: '31536000',
+        upsert: false,
+      });
+
+    if (uploadError) {
       return NextResponse.json(
-        { success: false, error: 'height must be a number' },
-        { status: 400 }
+        {
+          success: false,
+          error: uploadError.message,
+        },
+        { status: 500 }
       );
     }
 
-    const payload = {
-      file_name: fileName,
-      storage_path: storagePath,
+    const { data: publicUrlData } = supabaseAdmin.storage
+      .from('media')
+      .getPublicUrl(storagePath);
 
-      public_url: body.public_url
-        ? String(body.public_url).trim()
-        : null,
-
-      mime_type: body.mime_type
-        ? String(body.mime_type).trim()
-        : null,
-
-      file_size: fileSize,
-      width,
-      height,
-
-      alt_text:
-        body.alt_text === undefined ||
-        body.alt_text === null
-          ? null
-          : String(body.alt_text).trim(),
-
-      caption:
-        body.caption === undefined ||
-        body.caption === null
-          ? null
-          : String(body.caption).trim(),
-
-      folder: body.folder
-        ? String(body.folder).trim()
-        : 'general',
-
-      is_active:
-        typeof body.is_active === 'boolean'
-          ? body.is_active
-          : true,
-
-      uploaded_by: auth.admin.id,
-
-      updated_at: new Date().toISOString(),
-    };
+    const publicUrl = publicUrlData.publicUrl;
 
     const { data, error } = await supabaseAdmin
       .from('media')
-      .insert(payload)
+      .insert({
+        file_name: originalName,
+        storage_path: storagePath,
+        public_url: publicUrl,
+        mime_type: file.type,
+        file_size: file.size,
+        folder: 'general',
+        is_active: true,
+        uploaded_by: auth.admin.id,
+      })
       .select('*')
       .single();
 
     if (error) {
+      await supabaseAdmin.storage
+        .from('media')
+        .remove([storagePath]);
+
       return NextResponse.json(
-        { success: false, error: error.message },
+        {
+          success: false,
+          error: error.message,
+        },
         { status: 500 }
       );
     }
@@ -221,25 +208,30 @@ export async function POST(request: Request) {
       auth.admin.id,
       'create',
       data.id,
-      `Added media "${data.file_name}"`,
+      `Uploaded media "${originalName}"`,
       null,
       data
     );
 
     return NextResponse.json(
-      { success: true, data },
+      {
+        success: true,
+        data,
+      },
       { status: 201 }
     );
   } catch (error) {
+    console.error('Media upload error:', error);
+
     return NextResponse.json(
       {
         success: false,
         error:
           error instanceof Error
             ? error.message
-            : 'Invalid request',
+            : 'Failed to upload media',
       },
-      { status: 400 }
+      { status: 500 }
     );
   }
 }
@@ -421,6 +413,38 @@ export async function DELETE(request: Request) {
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
+    );
+  }
+
+  // Remove the matching Supabase Storage object when this media
+  // record points to an object in one of our public buckets.
+  try {
+    const storagePath = String(existing.storage_path || '').trim();
+
+    if (storagePath) {
+      const bucketCandidates = ['media', 'gallery', 'portfolio'];
+
+      for (const bucket of bucketCandidates) {
+        try {
+          const { error: storageError } = await supabaseAdmin.storage
+            .from(bucket)
+            .remove([storagePath]);
+
+          if (!storageError) {
+            break;
+          }
+        } catch (storageCleanupError) {
+          console.error(
+            `[Media Delete] Storage cleanup failed for ${bucket}:`,
+            storageCleanupError
+          );
+        }
+      }
+    }
+  } catch (storageCleanupError) {
+    console.error(
+      '[Media Delete] Storage cleanup exception:',
+      storageCleanupError
     );
   }
 
