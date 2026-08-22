@@ -1,5 +1,8 @@
 import { getPublicHomeSections, getPublicServices, getPublicFeaturedGallery, getPublicAboutContent } from '@/lib/cms/public';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import HeroSection from '@/components/sections/hero-section';
 import ServicesSlider from '@/components/sections/services-slider';
 import FeaturedGallery from '@/components/sections/featured-gallery';
