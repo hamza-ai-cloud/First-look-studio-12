@@ -7,23 +7,51 @@ import * as THREE from 'three';
 import { CameraModel, LensModel, PhotoFrame, Particles } from './models';
 
 function CameraRig() {
-  const { camera, pointer } = useThree();
-  useFrame(() => {
-    const targetX = pointer.x * 2;
-    const targetY = pointer.y * 1.5;
-    camera.position.x += (targetX - camera.position.x) * 0.05;
-    camera.position.y += (targetY - camera.position.y) * 0.05;
+  const { camera, pointer, viewport } = useThree();
+
+  useFrame((state) => {
+    const isMobile = viewport.width < 7;
+    const movement = isMobile ? 0.55 : 1;
+
+    const targetX = pointer.x * 1.4 * movement;
+    const targetY = pointer.y * 1.05 * movement;
+
+    camera.position.x += (targetX - camera.position.x) * 0.035;
+    camera.position.y += (targetY - camera.position.y) * 0.035;
+
+    camera.position.z +=
+      (6.15 - camera.position.z) * 0.02;
+
     camera.lookAt(0, 0, 0);
+
+    // Very subtle cinematic camera breathing.
+    const breathing =
+      Math.sin(state.clock.elapsedTime * 0.35) * 0.025;
+
+    camera.position.z += breathing;
   });
+
   return null;
 }
 
 function SceneGroup({ children }: { children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null);
+
   useFrame((state) => {
     if (!ref.current) return;
-    ref.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.15) * 0.15;
+
+    const t = state.clock.elapsedTime;
+
+    ref.current.rotation.y =
+      Math.sin(t * 0.12) * 0.11;
+
+    ref.current.rotation.x =
+      Math.sin(t * 0.08) * 0.025;
+
+    ref.current.position.y =
+      Math.sin(t * 0.18) * 0.035;
   });
+
   return <group ref={ref}>{children}</group>;
 }
 
@@ -46,9 +74,16 @@ export default function HeroScene() {
     <Canvas
       ref={canvasRef as never}
       shadows={false}
-      dpr={[1, 1.5]}
-      gl={{ antialias: false, alpha: true, powerPreference: 'high-performance', stencil: false, depth: true }}
+      dpr={[1, 1.25]}
+      gl={{
+        antialias: false,
+        alpha: true,
+        powerPreference: 'high-performance',
+        stencil: false,
+        depth: true,
+      }}
       frameloop="always"
+      performance={{ min: 0.65 }}
       className="!absolute inset-0"
     >
       <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
@@ -86,7 +121,7 @@ export default function HeroScene() {
           <PhotoFrame position={[-2.5, -2, -2]} rotation={[0.1, 0.3, 0.05]} color="#AA771C" />
           <PhotoFrame position={[2.5, 2.2, -2.5]} rotation={[0, -0.2, -0.08]} />
         </SceneGroup>
-        <Particles count={80} />
+        <Particles count={60} />
         <Environment preset="night" />
       </Suspense>
 
