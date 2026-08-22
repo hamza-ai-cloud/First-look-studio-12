@@ -52,3 +52,20 @@ export async function requireSuperAdmin(request: Request) {
     admin,
   };
 }
+
+
+export async function requireContentAdmin(request: Request) {
+  const admin = await getCmsAdmin(request);
+
+  if (!admin || (admin.role !== 'admin' && admin.role !== 'super_admin')) {
+    return {
+      authorized: false as const,
+      admin: null,
+    };
+  }
+
+  return {
+    authorized: true as const,
+    admin,
+  };
+}

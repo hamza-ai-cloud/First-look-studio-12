@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { requireContentAdmin } from '@/lib/cms/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
-
-const secret = process.env.NEXTAUTH_SECRET;
 
 const CONTACT_STATUSES = [
   'new',
@@ -13,19 +11,11 @@ const CONTACT_STATUSES = [
   'archived',
 ] as const;
 
-async function authorized(request: Request) {
-  const token = await getToken({
-    req: request as any,
-    secret,
-  });
-
-  const role = token?.role ? String(token.role) : '';
-
-  return role === 'admin' || role === 'super_admin';
-}
 
 export async function GET(request: Request) {
-  if (!(await authorized(request))) {
+  const auth = await requireContentAdmin(request);
+
+  if (!auth.authorized) {
     return NextResponse.json(
       { success: false, error: 'Unauthorized' },
       { status: 401 }
@@ -75,7 +65,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!(await authorized(request))) {
+  const auth = await requireContentAdmin(request);
+
+  if (!auth.authorized) {
     return NextResponse.json(
       { success: false, error: 'Unauthorized' },
       { status: 401 }
@@ -150,7 +142,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  if (!(await authorized(request))) {
+  const auth = await requireContentAdmin(request);
+
+  if (!auth.authorized) {
     return NextResponse.json(
       { success: false, error: 'Unauthorized' },
       { status: 401 }
@@ -234,7 +228,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await authorized(request))) {
+  const auth = await requireContentAdmin(request);
+
+  if (!auth.authorized) {
     return NextResponse.json(
       { success: false, error: 'Unauthorized' },
       { status: 401 }

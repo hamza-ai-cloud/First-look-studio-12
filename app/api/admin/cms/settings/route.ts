@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import {
-  requireCmsAdmin,
-} from '@/lib/cms/auth';
-
+import { requireSuperAdmin } from '@/lib/cms/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
@@ -44,7 +41,7 @@ async function logActivity(
  * List all CMS site settings.
  */
 export async function GET(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();
@@ -76,7 +73,7 @@ export async function GET(request: Request) {
  * Create a new site setting.
  */
 export async function POST(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();
@@ -167,7 +164,7 @@ export async function POST(request: Request) {
  * Update an existing site setting.
  */
 export async function PUT(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();
@@ -312,7 +309,7 @@ export async function PUT(request: Request) {
  * Delete a site setting.
  */
 export async function DELETE(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();

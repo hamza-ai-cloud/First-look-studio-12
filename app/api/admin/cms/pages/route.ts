@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { requireCmsAdmin } from '@/lib/cms/auth';
+import { requireSuperAdmin } from '@/lib/cms/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
@@ -56,7 +56,7 @@ function validStatus(value: unknown) {
  * List pages with their sections.
  */
 export async function GET(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
  * Create a page.
  */
 export async function POST(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();
@@ -279,7 +279,7 @@ export async function POST(request: Request) {
  * Update a page.
  */
 export async function PUT(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();
@@ -473,7 +473,7 @@ export async function PUT(request: Request) {
  * Delete a page and all of its sections.
  */
 export async function DELETE(request: Request) {
-  const auth = await requireCmsAdmin(request);
+  const auth = await requireSuperAdmin(request);
 
   if (!auth.authorized) {
     return unauthorized();

@@ -5,6 +5,9 @@ import { authOptions } from "@/lib/auth";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminScrollReset from "@/components/admin/AdminScrollReset";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata = {
   title: "Admin - First Look Studio",
   description: "First Look Studio administration dashboard",

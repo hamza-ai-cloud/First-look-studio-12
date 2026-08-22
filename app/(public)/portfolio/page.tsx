@@ -3,20 +3,59 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageHeader from '@/components/sections/page-header';
-import { portfolioItems } from '@/lib/data';
-import { portfolioImages } from '@/lib/pexels-data';
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 
-const categories = ['All', 'Wedding', 'Portrait', 'Event', 'Design', 'Printing'];
+const categories = [
+  'All',
+  'Weddings',
+  'Portraits',
+  'Fashion',
+  'Commercial',
+  'Events',
+  'Cinematic',
+];
 
 export default function PortfolioPage() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [portfolio, setPortfolio] = useState<any[]>([]);
+  const [loadingPortfolio, setLoadingPortfolio] = useState(true);
   const [visibleCount, setVisibleCount] = useState(6);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const filtered = activeCategory === 'All'
-    ? portfolioItems
-    : portfolioItems.filter((p) => p.category === activeCategory);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPortfolio() {
+      try {
+        const response = await fetch('/api/portfolio', {
+          cache: 'no-store',
+        });
+
+        const result = await response.json();
+
+        if (!cancelled && response.ok && result.success) {
+          setPortfolio(result.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to load live portfolio:', error);
+      } finally {
+        if (!cancelled) {
+          setLoadingPortfolio(false);
+        }
+      }
+    }
+
+    void loadPortfolio();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered =
+    activeCategory === 'All'
+      ? portfolio
+      : portfolio.filter((p) => p.category === activeCategory);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -95,7 +134,7 @@ export default function PortfolioPage() {
                   onClick={() => setLightboxIndex(filtered.indexOf(item))}
                 >
                   <img
-                    src={portfolioImages[i % portfolioImages.length].src.large}
+                    src={item.image_url}
                     alt={item.title}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -161,7 +200,7 @@ export default function PortfolioPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={portfolioImages[lightboxIndex % portfolioImages.length].src.large}
+                src={filtered[lightboxIndex]?.image_url || ''}
                 alt={filtered[lightboxIndex]?.title || ''}
                 className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
               />

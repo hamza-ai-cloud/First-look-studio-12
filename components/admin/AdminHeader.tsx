@@ -44,6 +44,7 @@ type NavItem = {
   icon: React.ComponentType<{
     className?: string;
   }>;
+  adminAllowed?: boolean;
 };
 
 type NavGroup = {
@@ -73,31 +74,49 @@ const groups: NavGroup[] = [
     items: [
       {
         label: "Bookings",
+        adminAllowed: true,
         href: "/admin/bookings",
         icon: CalendarCheck2,
       },
       {
         label: "Messages",
+        adminAllowed: true,
         href: "/admin/messages",
         icon: MessageSquare,
       },
       {
+        label: "Contact",
+        adminAllowed: true,
+        href: "/admin/contact",
+        icon: MessageSquare,
+      },
+      {
         label: "Services",
+        adminAllowed: true,
         href: "/admin/services",
         icon: FolderOpen,
       },
       {
         label: "Gallery",
+        adminAllowed: true,
         href: "/admin/gallery",
         icon: GalleryHorizontalEnd,
       },
       {
+        label: "Portfolio",
+        adminAllowed: true,
+        href: "/admin/portfolio",
+        icon: GalleryHorizontalEnd,
+      },
+      {
         label: "Careers",
+        adminAllowed: true,
         href: "/admin/careers",
         icon: BriefcaseBusiness,
       },
       {
         label: "Newsletter",
+        adminAllowed: true,
         href: "/admin/newsletter",
         icon: Mail,
       },
@@ -119,6 +138,7 @@ const groups: NavGroup[] = [
       },
       {
         label: "Photos & Media",
+        adminAllowed: true,
         href: "/admin/cms/media",
         icon: Image,
       },
@@ -183,11 +203,20 @@ export default function AdminHeader({
   const isSuperAdmin =
     role === "super_admin";
 
-  const visibleGroups = groups.filter(
-    (group) =>
-      !group.superAdminOnly ||
-      isSuperAdmin
-  );
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          isSuperAdmin ||
+          item.adminAllowed === true
+      ),
+    }))
+    .filter(
+      (group) =>
+        group.items.length > 0 &&
+        (!group.superAdminOnly || isSuperAdmin)
+    );
 
   const [mobileOpen, setMobileOpen] =
     useState(false);
@@ -232,9 +261,9 @@ export default function AdminHeader({
       redirect: false,
     });
 
-    // Always redirect on the current origin.
-    // This prevents local development from jumping to the production domain.
-    window.location.assign("/admin/signin");
+    // Replace the protected history entry so browser Back does not
+    // intentionally return to the logged-out admin dashboard.
+    window.location.replace("/admin/signin");
   }
 
   const navigation = (

@@ -302,6 +302,19 @@ export async function DELETE(request: Request) {
     );
   }
 
+  const { data: item, error: findError } = await supabaseAdmin
+    .from('gallery')
+    .select('id, image_url')
+    .eq('id', id)
+    .single();
+
+  if (findError || !item) {
+    return NextResponse.json(
+      { success: false, error: 'Gallery item not found' },
+      { status: 404 }
+    );
+  }
+
   const { error } = await supabaseAdmin
     .from('gallery')
     .delete()
@@ -311,6 +324,38 @@ export async function DELETE(request: Request) {
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
+    );
+  }
+
+  // Remove the matching Supabase Storage object when the URL
+  // belongs to our gallery bucket.
+  try {
+    const marker = '/storage/v1/object/public/gallery/';
+    const markerIndex = String(item.image_url || '').indexOf(marker);
+
+    if (markerIndex !== -1) {
+      const storagePath = decodeURIComponent(
+        String(item.image_url).slice(markerIndex + marker.length)
+      );
+
+      if (storagePath) {
+        const { error: storageError } =
+          await supabaseAdmin.storage
+            .from('gallery')
+            .remove([storagePath]);
+
+        if (storageError) {
+          console.error(
+            '[Gallery Delete] Storage cleanup failed:',
+            storageError.message
+          );
+        }
+      }
+    }
+  } catch (storageCleanupError) {
+    console.error(
+      '[Gallery Delete] Storage cleanup exception:',
+      storageCleanupError
     );
   }
 

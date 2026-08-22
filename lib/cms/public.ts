@@ -502,6 +502,27 @@ export async function getPublicGallery(): Promise<PublicGalleryItem[]> {
   return (data || []) as PublicGalleryItem[];
 }
 
+export async function getPublicPortfolio(): Promise<PublicGalleryItem[]> {
+  const { data, error } = await supabaseAdmin
+    .from("portfolio")
+    .select(
+      "id, title, image_url, category, aspect_ratio, description, is_featured"
+    )
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true })
+    .limit(100);
+
+  if (error) {
+    console.error(
+      "[CMS] Failed to load public portfolio:",
+      error.message
+    );
+    return [];
+  }
+
+  return (data || []) as PublicGalleryItem[];
+}
+
 export async function getPublicFeaturedGallery(): Promise<PublicGalleryItem[]> {
   const { data, error } = await supabaseAdmin
     .from("gallery")

@@ -53,9 +53,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  return NextResponse.next();
-}
+  const response = NextResponse.next();
 
-export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
-};
+  if (isAdminPage || isAdminApi) {
+    response.headers.set(
+      "Cache-Control",
+      "private, no-store, no-cache, max-age=0, must-revalidate"
+    );
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("Expires", "0");
+  }
+
+  return response;
+}

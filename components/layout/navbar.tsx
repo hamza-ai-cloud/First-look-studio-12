@@ -218,6 +218,15 @@ export default function Navbar({
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
             )}
+            <Link href="/admin/signin" className="hidden sm:block">
+              <Button
+                size="sm"
+                variant="outline"
+                className="glass gold-border text-foreground hover:bg-gold-400/10"
+              >
+                Admin
+              </Button>
+            </Link>
             <Link href="/booking" className="hidden sm:block">
               <Button
                 size="sm"
@@ -291,6 +300,14 @@ export default function Navbar({
                   </motion.div>
                 ))}
               </div>
+              <Link href="/admin/signin" className="mt-3 block">
+                <Button
+                  variant="outline"
+                  className="w-full glass gold-border text-foreground hover:bg-gold-400/10"
+                >
+                  Admin
+                </Button>
+              </Link>
               <Link href="/booking" className="mt-6 block">
                 <Button className="w-full bg-gradient-to-r from-gold-500 to-gold-400 text-black hover:from-gold-400 hover:to-gold-300">
                   Book Now

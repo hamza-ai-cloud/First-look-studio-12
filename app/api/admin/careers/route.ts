@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { requireContentAdmin } from '@/lib/cms/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
@@ -15,11 +15,9 @@ const CAREER_STATUSES = [
 ] as const;
 
 async function authorized(request: Request) {
-  const token = await getToken({ req: request as any, secret });
-  const role = token?.role ? String(token.role) : '';
-  return role === 'admin' || role === 'super_admin';
+  const auth = await requireContentAdmin(request);
+  return auth.authorized;
 }
-
 export async function GET(request: Request) {
   if (!(await authorized(request))) {
     return NextResponse.json(
