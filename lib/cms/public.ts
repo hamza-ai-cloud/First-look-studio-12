@@ -524,25 +524,46 @@ export async function getPublicPortfolio(): Promise<PublicGalleryItem[]> {
 }
 
 export async function getPublicFeaturedGallery(): Promise<PublicGalleryItem[]> {
-  const { data, error } = await supabaseAdmin
-    .from("gallery")
-    .select(
-      "id, title, image_url, category, aspect_ratio, description"
-    )
-    .eq("is_active", true)
-    .eq("is_featured", true)
-    .order("sort_order", { ascending: true })
-    .limit(12);
+  const [galleryResult, portfolioResult] = await Promise.all([
+    supabaseAdmin
+      .from("gallery")
+      .select(
+        "id, title, image_url, category, aspect_ratio, description"
+      )
+      .eq("is_active", true)
+      .eq("is_featured", true)
+      .order("sort_order", { ascending: true })
+      .limit(12),
 
-  if (error) {
+    supabaseAdmin
+      .from("portfolio")
+      .select(
+        "id, title, image_url, category, aspect_ratio, description"
+      )
+      .eq("is_active", true)
+      .eq("is_featured", true)
+      .order("sort_order", { ascending: true })
+      .limit(12),
+  ]);
+
+  if (galleryResult.error) {
     console.error(
-      "[CMS] Failed to load public featured gallery:",
-      error.message
+      "[CMS] Failed to load featured gallery:",
+      galleryResult.error.message
     );
-    return [];
   }
 
-  return (data || []) as PublicGalleryItem[];
+  if (portfolioResult.error) {
+    console.error(
+      "[CMS] Failed to load featured portfolio:",
+      portfolioResult.error.message
+    );
+  }
+
+  const galleryItems = (galleryResult.data || []) as PublicGalleryItem[];
+  const portfolioItems = (portfolioResult.data || []) as PublicGalleryItem[];
+
+  return [...galleryItems, ...portfolioItems].slice(0, 12);
 }
 
 export async function getPublicServices() {
