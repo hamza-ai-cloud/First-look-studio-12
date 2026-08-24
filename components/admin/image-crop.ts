@@ -5,31 +5,92 @@ export type CropAreaPixels = {
   y: number;
 };
 
+export type ImageTransformOptions = {
+  rotation?: number;
+  flipH?: boolean;
+  flipV?: boolean;
+};
+
 export async function createCroppedImage(
   imageSrc: string,
   crop: CropAreaPixels,
-  fileName = "cropped-image.webp"
+  fileName = "cropped-image.webp",
+  options: ImageTransformOptions = {}
 ): Promise<File> {
   const image = await loadImage(imageSrc);
 
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+  const rotation =
+    ((options.rotation ?? 0) % 360 + 360) % 360;
 
-  if (!ctx) {
+  const flipH = options.flipH ?? false;
+  const flipV = options.flipV ?? false;
+
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
+
+  const radians = (rotation * Math.PI) / 180;
+  const sin = Math.abs(Math.sin(radians));
+  const cos = Math.abs(Math.cos(radians));
+
+  const rotatedWidth = Math.ceil(
+    sourceWidth * cos + sourceHeight * sin
+  );
+
+  const rotatedHeight = Math.ceil(
+    sourceWidth * sin + sourceHeight * cos
+  );
+
+  const sourceCanvas = document.createElement("canvas");
+  sourceCanvas.width = rotatedWidth;
+  sourceCanvas.height = rotatedHeight;
+
+  const sourceContext = sourceCanvas.getContext("2d");
+
+  if (!sourceContext) {
     throw new Error("Could not create image canvas.");
   }
+
+  sourceContext.imageSmoothingEnabled = true;
+  sourceContext.imageSmoothingQuality = "high";
+
+  sourceContext.translate(
+    rotatedWidth / 2,
+    rotatedHeight / 2
+  );
+
+  sourceContext.rotate(radians);
+
+  sourceContext.scale(
+    flipH ? -1 : 1,
+    flipV ? -1 : 1
+  );
+
+  sourceContext.drawImage(
+    image,
+    -sourceWidth / 2,
+    -sourceHeight / 2,
+    sourceWidth,
+    sourceHeight
+  );
 
   const width = Math.max(1, Math.round(crop.width));
   const height = Math.max(1, Math.round(crop.height));
 
-  canvas.width = width;
-  canvas.height = height;
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = width;
+  outputCanvas.height = height;
 
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
+  const outputContext = outputCanvas.getContext("2d");
 
-  ctx.drawImage(
-    image,
+  if (!outputContext) {
+    throw new Error("Could not create output canvas.");
+  }
+
+  outputContext.imageSmoothingEnabled = true;
+  outputContext.imageSmoothingQuality = "high";
+
+  outputContext.drawImage(
+    sourceCanvas,
     Math.round(crop.x),
     Math.round(crop.y),
     width,
@@ -41,7 +102,7 @@ export async function createCroppedImage(
   );
 
   const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/webp", 0.95)
+    outputCanvas.toBlob(resolve, "image/webp", 0.95)
   );
 
   if (!blob) {
@@ -59,8 +120,11 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     const image = new Image();
 
     image.onload = () => resolve(image);
+
     image.onerror = () =>
-      reject(new Error("Could not load the selected image."));
+      reject(
+        new Error("Could not load the selected image.")
+      );
 
     image.src = src;
   });

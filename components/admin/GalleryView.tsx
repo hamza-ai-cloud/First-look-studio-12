@@ -68,7 +68,23 @@ export default function GalleryView({
   const [croppedAreaPixels, setCroppedAreaPixels] =
     useState<CropAreaPixels | null>(null);
   const [formAspectRatio, setFormAspectRatio] =
-    useState<"portrait" | "landscape" | "square">("landscape");
+    useState<
+      | "free"
+      | "landscape"
+      | "portrait"
+      | "square"
+      | "4:3"
+      | "3:2"
+      | "4:5"
+      | "2:3"
+      | "9:16"
+      | "16:9"
+    >("landscape");
+
+  const [cropMode, setCropMode] = useState<"fill" | "fit">("fill");
+  const [rotation, setRotation] = useState(0);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
   const [formFeatured, setFormFeatured] = useState(false);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -119,6 +135,16 @@ export default function GalleryView({
     );
     setFormImageUrl(item.image_url);
     setFormAspectRatio(item.aspect_ratio || "landscape");
+    setCropMode("fill");
+
+    // Open the existing image directly in the advanced crop editor.
+    setCropSource(item.image_url);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setRotation(0);
+    setFlipH(false);
+    setFlipV(false);
+    setCroppedAreaPixels(null);
     setFormFeatured(!!item.is_featured);
     setIsModalOpen(true);
   };
@@ -181,6 +207,7 @@ export default function GalleryView({
         message:
           "Your image has been uploaded successfully. You can now save it to your gallery.",
       });
+      return result.data.image_url;
     } catch (error) {
       showToast({
         type: "error",
@@ -219,6 +246,10 @@ export default function GalleryView({
     setCropSource(objectUrl);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
+    setRotation(0);
+    setFlipH(false);
+    setFlipV(false);
+    setCropMode("fill");
     setCroppedAreaPixels(null);
   };
 
@@ -767,22 +798,117 @@ export default function GalleryView({
                 crop={crop}
                 zoom={zoom}
                 aspect={
-                  formAspectRatio === "portrait"
-                    ? 3 / 4
-                    : formAspectRatio === "square"
-                      ? 1
-                      : 16 / 9
+                  formAspectRatio === "free"
+                    ? undefined
+                    : formAspectRatio === "portrait"
+                      ? 3 / 4
+                      : formAspectRatio === "square"
+                        ? 1
+                        : formAspectRatio === "4:3"
+                          ? 4 / 3
+                          : formAspectRatio === "3:2"
+                            ? 3 / 2
+                            : formAspectRatio === "4:5"
+                              ? 4 / 5
+                              : formAspectRatio === "2:3"
+                                ? 2 / 3
+                                : formAspectRatio === "9:16"
+                                  ? 9 / 16
+                                  : formAspectRatio === "16:9"
+                                    ? 16 / 9
+                                    : 16 / 9
                 }
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={(_, areaPixels) =>
                   setCroppedAreaPixels(areaPixels)
                 }
-                objectFit="contain"
+                objectFit={cropMode === "fit" ? "contain" : "cover"}
+                rotation={rotation}
+                transform={`rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`}
               />
             </div>
 
             <div className="space-y-4 border-t border-[#30363d] bg-[#0d1117] p-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="mr-1 text-xs font-semibold text-[#8b949e]">
+                  Image
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setCropMode("fit")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    cropMode === "fit"
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#21262d] text-[#c9d1d9] hover:bg-[#30363d]"
+                  }`}
+                >
+                  Fit
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCropMode("fill")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    cropMode === "fill"
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#21262d] text-[#c9d1d9] hover:bg-[#30363d]"
+                  }`}
+                >
+                  Fill
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRotation((value) => (value + 90) % 360)
+                  }
+                  className="rounded-lg bg-[#21262d] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] hover:bg-[#30363d]"
+                >
+                  Rotate 90°
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFlipH((value) => !value)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    flipH
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#21262d] text-[#c9d1d9] hover:bg-[#30363d]"
+                  }`}
+                >
+                  Flip H
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFlipV((value) => !value)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                    flipV
+                      ? "bg-purple-600 text-white"
+                      : "bg-[#21262d] text-[#c9d1d9] hover:bg-[#30363d]"
+                  }`}
+                >
+                  Flip V
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCrop({ x: 0, y: 0 });
+                    setZoom(1);
+                    setRotation(0);
+                    setFlipH(false);
+                    setFlipV(false);
+                    setCropMode("fill");
+                  }}
+                  className="rounded-lg bg-[#21262d] px-3 py-1.5 text-xs font-semibold text-[#c9d1d9] hover:bg-[#30363d]"
+                >
+                  Reset
+                </button>
+              </div>
+
               <div className="flex items-center gap-3">
                 <span className="text-xs font-semibold text-[#8b949e]">
                   Zoom
@@ -842,7 +968,12 @@ export default function GalleryView({
                         const croppedFile = await createCroppedImage(
                           cropSource,
                           croppedAreaPixels,
-                          "cropped-image.webp"
+                          "cropped-image.webp",
+                          {
+                            rotation,
+                            flipH,
+                            flipV,
+                          }
                         );
 
                         if (croppedFile.size > 5 * 1024 * 1024) {
@@ -855,14 +986,28 @@ export default function GalleryView({
                           return;
                         }
 
-                        URL.revokeObjectURL(cropSource);
-                        setCropSource(null);
+                        const uploadedUrl = await uploadFile(croppedFile);
 
-                        await uploadFile(croppedFile);
+                        if (!uploadedUrl) {
+                          showToast({
+                            type: "error",
+                            title: "Crop Upload Failed",
+                            message: "The edited image could not be uploaded.",
+                          });
+                          return;
+                        }
+
+                        // Replace the current image with the newly cropped image.
+                        setFormImageUrl(uploadedUrl);
 
                         setZoom(1);
                         setCrop({ x: 0, y: 0 });
+                        setRotation(0);
+                        setFlipH(false);
+                        setFlipV(false);
                         setCroppedAreaPixels(null);
+                        URL.revokeObjectURL(cropSource);
+                        setCropSource(null);
                       } catch (error) {
                         showToast({
                           type: "error",

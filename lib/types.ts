@@ -42,9 +42,16 @@ export type GalleryCategory =
   | 'Cinematic';
 
 export type GalleryAspectRatio =
-  | 'portrait'
-  | 'landscape'
-  | 'square';
+  | "free"
+  | "portrait"
+  | "landscape"
+  | "square"
+  | "4:3"
+  | "3:2"
+  | "4:5"
+  | "2:3"
+  | "9:16"
+  | "16:9";
 
 export interface AdminRecord {
   id: string;
