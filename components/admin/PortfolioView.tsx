@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Cropper from "react-easy-crop";
+import { createCroppedImage, type CropAreaPixels } from "./image-crop";
 import {
   Image as ImageIcon,
   Plus,
@@ -60,6 +62,11 @@ export default function PortfolioView({
   const [formCategory, setFormCategory] =
     useState<(typeof PORTFOLIO_CATEGORIES)[number]>("Weddings");
   const [formImageUrl, setFormImageUrl] = useState("");
+  const [cropSource, setCropSource] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] =
+    useState<CropAreaPixels | null>(null);
   const [formAspectRatio, setFormAspectRatio] =
     useState<"portrait" | "landscape" | "square">("landscape");
   const [formFeatured, setFormFeatured] = useState(false);
@@ -126,11 +133,11 @@ export default function PortfolioView({
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       showToast({
         type: "error",
         title: "Image Too Large",
-        message: "Please choose an image smaller than 10 MB.",
+        message: "Please choose an image no larger than 5 MB.",
       });
       return;
     }
@@ -188,13 +195,40 @@ export default function PortfolioView({
     }
   };
 
+  const prepareImageForUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      showToast({
+        type: "error",
+        title: "Invalid File",
+        message: "Please choose an image file.",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast({
+        type: "error",
+        title: "Image Too Large",
+        message: "Please choose an image no larger than 5 MB.",
+      });
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    setCropSource(objectUrl);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+  };
+
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
 
     if (file) {
-      void uploadFile(file);
+      void prepareImageForUpload(file);
     }
 
     event.target.value = "";
@@ -207,7 +241,7 @@ export default function PortfolioView({
     const file = event.dataTransfer.files?.[0];
 
     if (file) {
-      void uploadFile(file);
+      void prepareImageForUpload(file);
     }
   };
 
@@ -581,7 +615,7 @@ export default function PortfolioView({
                   </div>
 
                   <div className="mt-1 text-[11px] text-[#8b949e]">
-                    JPG, PNG, WEBP, GIF or AVIF · Max 10 MB
+                    JPG, PNG, WEBP, GIF or AVIF · Max 5 MB
                   </div>
 
                   <button
@@ -700,6 +734,167 @@ export default function PortfolioView({
           </div>
         </div>
       )}
+
+      {cropSource && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-4xl overflow-hidden rounded-2xl border border-[#30363d] bg-[#0d1117] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#30363d] px-5 py-4">
+              <div>
+                <h3 className="font-bold text-white">Edit & Crop Image</h3>
+                <p className="mt-0.5 text-xs text-[#8b949e]">
+                  Drag the image, zoom in/out, then apply the crop.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  URL.revokeObjectURL(cropSource);
+                  setCropSource(null);
+                  setZoom(1);
+                  setCrop({ x: 0, y: 0 });
+                  setCroppedAreaPixels(null);
+                }}
+                className="rounded-lg p-2 text-[#8b949e] hover:bg-[#21262d] hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="relative h-[55vh] min-h-[320px] bg-black">
+              <Cropper
+                image={cropSource}
+                crop={crop}
+                zoom={zoom}
+                aspect={
+                  formAspectRatio === "portrait"
+                    ? 3 / 4
+                    : formAspectRatio === "square"
+                      ? 1
+                      : 16 / 9
+                }
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, areaPixels) =>
+                  setCroppedAreaPixels(areaPixels)
+                }
+                objectFit="contain"
+              />
+            </div>
+
+            <div className="space-y-4 border-t border-[#30363d] bg-[#0d1117] p-5">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-[#8b949e]">
+                  Zoom
+                </span>
+
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.05}
+                  value={zoom}
+                  onChange={(event) =>
+                    setZoom(Number(event.target.value))
+                  }
+                  className="flex-1 accent-purple-500"
+                />
+
+                <span className="w-12 text-right text-xs text-white">
+                  {zoom.toFixed(2)}x
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-[#8b949e]">
+                  Ratio:{" "}
+                  <span className="font-semibold text-white">
+                    {formAspectRatio === "portrait"
+                      ? "Portrait 3:4"
+                      : formAspectRatio === "square"
+                        ? "Square 1:1"
+                        : "Landscape 16:9"}
+                  </span>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      URL.revokeObjectURL(cropSource);
+                      setCropSource(null);
+                      setZoom(1);
+                      setCrop({ x: 0, y: 0 });
+                      setCroppedAreaPixels(null);
+                    }}
+                    className="rounded-xl bg-[#21262d] px-4 py-2 text-sm font-semibold text-white hover:bg-[#30363d]"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={!croppedAreaPixels || isUploading}
+                    onClick={async () => {
+                      if (!cropSource || !croppedAreaPixels) return;
+
+                      try {
+                        const croppedFile = await createCroppedImage(
+                          cropSource,
+                          croppedAreaPixels,
+                          "cropped-image.webp"
+                        );
+
+                        if (croppedFile.size > 5 * 1024 * 1024) {
+                          showToast({
+                            type: "error",
+                            title: "Cropped Image Too Large",
+                            message:
+                              "The cropped image is still larger than 5 MB. Please reduce the crop area or zoom out and try again.",
+                          });
+                          return;
+                        }
+
+                        URL.revokeObjectURL(cropSource);
+                        setCropSource(null);
+
+                        await uploadFile(croppedFile);
+
+                        setZoom(1);
+                        setCrop({ x: 0, y: 0 });
+                        setCroppedAreaPixels(null);
+                      } catch (error) {
+                        showToast({
+                          type: "error",
+                          title: "Crop Failed",
+                          message:
+                            error instanceof Error
+                              ? error.message
+                              : "Could not crop the image.",
+                        });
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2 text-sm font-bold text-white hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" />
+                        Apply Crop
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 import { requireCmsAdmin } from '@/lib/cms/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+import sharp from 'sharp';
 export const runtime = 'nodejs';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg',
@@ -50,14 +51,11 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Image is too large. Maximum file size is 10 MB.',
+          error: 'Image is too large. Maximum file size is 5 MB.',
         },
         { status: 400 }
       );
     }
-
-    const extension =
-      file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : 'jpg';
 
     const baseName =
       file.name
@@ -67,15 +65,30 @@ export async function POST(request: Request) {
         .replace(/^-+|-+$/g, '')
         .slice(0, 80) || 'gallery-image';
 
+    const extension = 'webp';
+
     const storagePath =
-      `${baseName}-${crypto.randomUUID()}.${extension || 'jpg'}`;
+      `${baseName}-${crypto.randomUUID()}.${extension}`;
 
     const bytes = await file.arrayBuffer();
 
+    // Process the image server-side for a high-quality, web-friendly output.
+    // Preserve the original composition; crop coordinates will be added
+    // by the admin crop editor in the next step.
+    const processedBuffer = await sharp(Buffer.from(bytes), {
+      failOn: 'none',
+    })
+      .rotate()
+      .webp({
+        quality: 95,
+        effort: 5,
+      })
+      .toBuffer();
+
     const { error: uploadError } = await supabaseAdmin.storage
       .from('gallery')
-      .upload(storagePath, bytes, {
-        contentType: file.type,
+      .upload(storagePath, processedBuffer, {
+        contentType: 'image/webp',
         cacheControl: '31536000',
         upsert: false,
       });
@@ -103,7 +116,7 @@ export async function POST(request: Request) {
         storage_path: storagePath,
         image_url: data.publicUrl,
         mime_type: file.type,
-        file_size: file.size,
+        file_size: processedBuffer.length,
       },
     });
   } catch (error) {

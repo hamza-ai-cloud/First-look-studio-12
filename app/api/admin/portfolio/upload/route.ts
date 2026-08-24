@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { requireContentAdmin } from '@/lib/cms/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+import sharp from 'sharp';
 export const runtime = 'nodejs';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg',
@@ -49,28 +50,36 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Image must be between 1 byte and 10 MB',
+          error: 'Image must be between 1 byte and 5 MB',
         },
         { status: 400 }
       );
     }
 
-    const extension =
-      file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const extension = 'webp';
 
-    const safeExtension = /^[a-z0-9]+$/.test(extension)
-      ? extension
-      : 'jpg';
-
-    const filename = `${crypto.randomUUID()}.${safeExtension}`;
+    const filename = `${crypto.randomUUID()}.${extension}`;
     const storagePath = `uploads/${filename}`;
 
     const bytes = await file.arrayBuffer();
 
+    // Process the image server-side for a high-quality, web-friendly output.
+    // Preserve the original composition; crop coordinates will be added
+    // by the admin crop editor in the next step.
+    const processedBuffer = await sharp(Buffer.from(bytes), {
+      failOn: 'none',
+    })
+      .rotate()
+      .webp({
+        quality: 95,
+        effort: 5,
+      })
+      .toBuffer();
+
     const { error: uploadError } = await supabaseAdmin.storage
       .from('portfolio')
-      .upload(storagePath, bytes, {
-        contentType: file.type,
+      .upload(storagePath, processedBuffer, {
+        contentType: 'image/webp',
         cacheControl: '31536000',
         upsert: false,
       });
